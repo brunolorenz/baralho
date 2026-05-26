@@ -3,281 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Baralho Criativo">
+<meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18180F" media="(prefers-color-scheme: dark)">
+<link rel="manifest" id="manifestLink">
 <title>Baralho Criativo</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#F6F3EE;--surface:#FFF;--ink:#18180F;--ink-mid:#6A6860;--ink-light:#A8A49A;
-  --border:rgba(24,24,15,0.11);--border-mid:rgba(24,24,15,0.22);
-  --radius:18px;--radius-sm:10px;--card-h:560px;
-}
-@media(prefers-color-scheme:dark){:root{
-  --bg:#18180F;--surface:#222218;--ink:#F0EDE4;--ink-mid:#A8A49A;--ink-light:#6A6860;
-  --border:rgba(240,237,228,0.10);--border-mid:rgba(240,237,228,0.20);
-}}
+:root{--bg:#F6F3EE;--surface:#FFF;--ink:#18180F;--ink-mid:#6A6860;--ink-light:#A8A49A;--border:rgba(24,24,15,0.11);--border-mid:rgba(24,24,15,0.22);--radius:18px;--radius-sm:10px;--card-h:560px}
+@media(prefers-color-scheme:dark){:root{--bg:#18180F;--surface:#222218;--ink:#F0EDE4;--ink-mid:#A8A49A;--ink-light:#6A6860;--border:rgba(240,237,228,0.10);--border-mid:rgba(240,237,228,0.20)}}
 html,body{height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  -webkit-font-smoothing:antialiased;user-select:none}
-
-/* ── HEADER ── */
-header{width:100%;max-width:440px;padding:2rem 1.5rem 1.25rem;
-  display:flex;justify-content:space-between;align-items:baseline}
+body{font-family:'DM Sans','Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased;user-select:none}
+header{width:100%;max-width:440px;padding:2rem 1.5rem 1.25rem;display:flex;justify-content:space-between;align-items:baseline}
 header h1{font-size:0.75rem;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mid)}
 .counter-txt{font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:300;color:var(--ink-light)}
-
-/* ── STAGE ── */
-.stage{width:100%;max-width:440px;padding:0 1.5rem 3rem;display:flex;
-  flex-direction:column;align-items:center;gap:1rem}
-
-/* ── CARD FLIP ── */
-.card-wrap{width:100%;perspective:1400px;touch-action:pan-y}
-.card-inner{position:relative;width:100%;min-height:var(--card-h);transform-style:preserve-3d;
-  transition:transform 0.52s cubic-bezier(0.42,0,0.18,1);cursor:pointer}
+.stage{width:100%;max-width:440px;padding:0 1.5rem 3rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+/* card viewport clips slide animation */
+.card-viewport{width:100%;overflow:hidden;border-radius:var(--radius)}
+.card-wrap{width:100%;touch-action:pan-y;position:relative;min-height:var(--card-h)}
+@keyframes slideInRight{from{transform:translateX(110%)}to{transform:translateX(0)}}
+.card-inner{position:relative;width:100%;min-height:var(--card-h);transform-style:preserve-3d;transition:transform 0.52s cubic-bezier(0.42,0,0.18,1);cursor:pointer}
 .card-inner.flipped{transform:rotateY(180deg)}
-.card-inner.shuffle-anim{animation:shuffleAnim 0.45s ease both}
-@keyframes shuffleAnim{
-  0%{transform:translateX(0) rotate(0deg)}
-  25%{transform:translateX(-8px) rotate(-1.5deg)}
-  50%{transform:translateX(6px) rotate(1deg)}
-  75%{transform:translateX(-4px) rotate(-0.5deg)}
-  100%{transform:translateX(0) rotate(0deg)}
-}
-.card-face{position:absolute;top:0;left:0;right:0;min-height:var(--card-h);
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  border-radius:var(--radius);border:0.5px solid var(--border);
-  background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.card-inner.slide-in{animation:slideInRight 0.38s cubic-bezier(0.22,1,0.36,1) both}
+.card-face{position:absolute;top:0;left:0;right:0;min-height:var(--card-h);backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);border:0.5px solid var(--border);background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
 .card-back-face{transform:rotateY(180deg)}
-@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(0.96)}to{opacity:1;transform:none}}
-.card-entering .card-face{animation:cardIn 0.4s cubic-bezier(0.34,1.15,0.64,1) both}
-
-/* ── FACE FRONT ── */
+/* hide back face during slide so it doesn't flash */
+.card-inner.slide-in .card-back-face{visibility:hidden}
 .face-front,.face-back{display:flex;flex-direction:column;height:100%;min-height:var(--card-h)}
-.front-meta,.back-meta{display:flex;justify-content:space-between;align-items:center;
-  padding:1.1rem 1.4rem 0.9rem;border-bottom:0.5px solid var(--border)}
+.front-meta,.back-meta{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.4rem 0.9rem;border-bottom:0.5px solid var(--border)}
 .front-suit,.back-label{font-size:0.62rem;font-weight:500;letter-spacing:0.18em;text-transform:uppercase}
 .front-num{font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:300;color:var(--ink-light)}
 .front-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2rem 1.6rem 1.5rem}
 .front-prompt{font-size:1.55rem;font-weight:400;line-height:1.3;letter-spacing:-0.01em;white-space:pre-line}
-.front-kids{margin-top:1.25rem;display:flex;align-items:center;gap:6px;font-size:0.65rem;
-  font-weight:400;letter-spacing:0.09em;text-transform:uppercase;color:var(--ink-light)}
+.front-kids{margin-top:1.25rem;display:flex;align-items:center;gap:6px;font-size:0.65rem;font-weight:400;letter-spacing:0.09em;text-transform:uppercase;color:var(--ink-light)}
 .kids-dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:0.6}
-.front-hint{padding:0.9rem 1.4rem;border-top:0.5px solid var(--border);
-  display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.front-hint{padding:0.9rem 1.4rem;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .hint-txt{font-size:0.65rem;color:var(--ink-light);letter-spacing:0.05em}
-.fav-btn{background:none;border:none;cursor:pointer;padding:4px;
-  font-size:1rem;line-height:1;color:var(--ink-light);transition:transform 0.2s,color 0.2s}
+.fav-btn{background:none;border:none;cursor:pointer;padding:4px;font-size:1rem;line-height:1;color:var(--ink-light);transition:transform 0.2s,color 0.2s}
 .fav-btn.active{color:#D4603A}
 .fav-btn:hover{transform:scale(1.15)}
-
-/* ── FACE BACK ── */
 .back-time-wrap{display:flex;align-items:center;gap:8px}
 .back-time{font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:300;color:var(--ink-light)}
-.timer-start-btn{font-family:'DM Sans',monospace;font-size:0.6rem;font-weight:500;
-  letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;
-  border:0.5px solid var(--border-mid);background:transparent;color:var(--ink-mid);
-  cursor:pointer;transition:all 0.15s}
+.timer-start-btn{font-family:inherit;font-size:0.6rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;border:0.5px solid var(--border-mid);background:transparent;color:var(--ink-mid);cursor:pointer;transition:all 0.15s}
 .timer-start-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.back-body{flex:1;overflow-y:auto;padding:1.25rem 1.4rem 1rem;display:flex;
-  flex-direction:column;gap:1.25rem;-webkit-overflow-scrolling:touch}
-.back-section-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--ink-light);margin-bottom:0.45rem}
+.back-body{flex:1;overflow-y:auto;padding:1.25rem 1.4rem 1rem;display:flex;flex-direction:column;gap:1.25rem;-webkit-overflow-scrolling:touch}
+.back-section-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.45rem}
 .back-why{font-size:0.87rem;line-height:1.68;color:var(--ink-mid);font-weight:300}
 .back-how{font-size:0.87rem;line-height:1.68;color:var(--ink);font-weight:300}
 .back-vars{display:flex;flex-direction:column;gap:0.5rem}
-.back-var{font-size:0.8rem;line-height:1.55;color:var(--ink-mid);font-style:italic;
-  font-weight:300;padding-left:0.85rem;border-left:1.5px solid var(--border-mid)}
-.back-bottom{padding:0.9rem 1.4rem;border-top:0.5px solid var(--border);
-  display:flex;justify-content:flex-end;align-items:center;flex-shrink:0}
+.back-var{font-size:0.8rem;line-height:1.55;color:var(--ink-mid);font-style:italic;font-weight:300;padding-left:0.85rem;border-left:1.5px solid var(--border-mid)}
+.back-bottom{padding:0.9rem 1.4rem;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;align-items:center;flex-shrink:0}
 .hint-arrow{font-size:0.65rem;color:var(--ink-light);letter-spacing:0.05em}
-
-/* ── TIMER OVERLAY ── */
-.timer-overlay{position:fixed;inset:0;background:var(--ink);color:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s;padding:2rem}
+.timer-overlay{position:fixed;inset:0;background:var(--ink);color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s;padding:2rem}
 .timer-overlay.active{opacity:1;pointer-events:all}
-.timer-suit{font-size:0.62rem;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;
-  margin-bottom:1rem;opacity:0.5}
-.timer-prompt{font-size:1.1rem;font-weight:300;max-width:260px;text-align:center;
-  line-height:1.4;margin-bottom:2.5rem;opacity:0.8;white-space:pre-line}
-.timer-display{font-family:'DM Mono',monospace;font-size:4.5rem;font-weight:300;
-  letter-spacing:-0.02em;margin-bottom:2rem;transition:color 0.3s}
+.timer-suit-lbl{font-size:0.62rem;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;opacity:0.5}
+.timer-prompt-lbl{font-size:1.1rem;font-weight:300;max-width:260px;text-align:center;line-height:1.4;margin-bottom:2.5rem;opacity:0.8;white-space:pre-line}
+.timer-display{font-family:'DM Mono',monospace;font-size:4.5rem;font-weight:300;letter-spacing:-0.02em;margin-bottom:2rem;transition:color 0.3s}
 .timer-display.urgent{color:#FF6B4A}
 .timer-controls{display:flex;gap:12px}
-.timer-ctrl-btn{padding:10px 24px;border-radius:99px;border:0.5px solid rgba(240,237,228,0.3);
-  background:transparent;color:var(--bg);font-family:'DM Sans',sans-serif;font-size:0.75rem;
-  font-weight:400;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+.timer-ctrl-btn{padding:10px 24px;border-radius:99px;border:0.5px solid rgba(240,237,228,0.3);background:transparent;color:var(--bg);font-family:inherit;font-size:0.75rem;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
 .timer-ctrl-btn:hover{background:rgba(240,237,228,0.12)}
 .timer-ctrl-btn.primary{background:rgba(240,237,228,0.15);border-color:rgba(240,237,228,0.5)}
-.timer-progress{position:absolute;bottom:0;left:0;height:2px;background:var(--bg);
-  opacity:0.3;transition:width 1s linear}
-
-/* ── HISTORY ── */
+.timer-progress{position:absolute;bottom:0;left:0;height:2px;background:var(--bg);opacity:0.3;transition:width 1s linear}
 .history-wrap{width:100%;display:flex;flex-direction:column;gap:0.5rem}
-.history-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--ink-light)}
-.history-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;padding-bottom:2px}
+.history-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-light)}
+.history-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
 .history-row::-webkit-scrollbar{display:none}
-.history-chip{flex-shrink:0;padding:5px 10px;border-radius:var(--radius-sm);
-  border:0.5px solid var(--border);background:var(--surface);cursor:pointer;transition:opacity 0.15s}
+.history-chip{flex-shrink:0;padding:5px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);cursor:pointer;transition:opacity 0.15s}
 .history-chip:hover{opacity:0.75}
 .history-chip-suit{font-size:0.55rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:2px}
-.history-chip-text{font-size:0.7rem;font-weight:300;color:var(--ink-mid);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;display:block}
-
-/* ── FAVORITES PANEL ── */
+.history-chip-text{font-size:0.7rem;font-weight:300;color:var(--ink-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;display:block}
 .fav-panel{width:100%;display:none;flex-direction:column;gap:0.75rem}
 .fav-panel.open{display:flex}
 .fav-panel-header{display:flex;justify-content:space-between;align-items:center}
 .fav-panel-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-light)}
-.fav-clear-btn{font-size:0.6rem;color:var(--ink-light);background:none;border:none;
-  cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;font-family:'DM Sans',sans-serif}
-.fav-clear-btn:hover{color:var(--ink)}
+.fav-clear-btn{font-size:0.6rem;color:var(--ink-light);background:none;border:none;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;font-family:inherit}
 .fav-chips{display:flex;gap:6px;flex-wrap:wrap}
-.fav-chip{padding:5px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);
-  background:var(--surface);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px}
+.fav-chip{padding:5px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity 0.15s}
 .fav-chip:hover{opacity:0.75}
 .fav-chip-suit{font-size:0.55rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase}
-.fav-chip-text{font-size:0.7rem;font-weight:300;color:var(--ink-mid);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px}
+.fav-chip-text{font-size:0.7rem;font-weight:300;color:var(--ink-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px}
 .fav-chip-remove{font-size:0.65rem;color:var(--ink-light);flex-shrink:0}
 .fav-empty{font-size:0.78rem;color:var(--ink-light);font-weight:300}
-
-/* ── BUTTONS ── */
 .btn-row{width:100%;display:flex;gap:8px}
-.draw-btn{flex:1;padding:1rem 1.5rem;background:var(--ink);color:var(--bg);border:none;
-  border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.82rem;
-  font-weight:400;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
-  transition:opacity 0.15s,transform 0.12s}
+.draw-btn{flex:1;padding:1rem 1.5rem;background:var(--ink);color:var(--bg);border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:0.82rem;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s,transform 0.12s}
 .draw-btn:hover{opacity:0.84}
 .draw-btn:active{transform:scale(0.98)}
-.icon-btn{width:48px;height:48px;flex-shrink:0;border:0.5px solid var(--border-mid);
-  background:var(--surface);border-radius:var(--radius-sm);display:flex;align-items:center;
-  justify-content:center;cursor:pointer;font-size:1rem;transition:all 0.15s}
-.icon-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.icon-btn.active-mode{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-/* ── EMPTY ── */
-.empty{width:100%;border:0.5px dashed var(--border-mid);border-radius:var(--radius);
-  min-height:var(--card-h);display:flex;flex-direction:column;justify-content:center;
-  align-items:center;gap:0;padding:2rem}
-.empty-hint{font-size:0.82rem;color:var(--ink-light);font-weight:300;text-align:center;
-  line-height:1.6;margin-bottom:1.5rem}
+.icon-btn{width:48px;height:48px;flex-shrink:0;border:0.5px solid var(--border-mid);background:var(--surface);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all 0.15s}
+.icon-btn:hover,.icon-btn.active-mode{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.empty{width:100%;border:0.5px dashed var(--border-mid);border-radius:var(--radius);min-height:var(--card-h);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem}
+.empty-hint{font-size:0.82rem;color:var(--ink-light);font-weight:300;text-align:center;line-height:1.6;margin-bottom:1.5rem}
 .cod-area{width:100%;border-top:0.5px solid var(--border-mid);padding-top:1rem;text-align:left}
-.cod-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
-  color:var(--ink-light);margin-bottom:0.4rem}
+.cod-label{font-size:0.6rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.4rem}
 .cod-suit{font-size:0.62rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:0.3rem}
 .cod-prompt{font-size:1rem;font-weight:400;line-height:1.35;cursor:pointer;white-space:pre-line}
 .cod-prompt:hover{opacity:0.7}
-
-/* ── LIST OVERLAY ── */
-.list-overlay{position:fixed;inset:0;background:var(--bg);z-index:50;
-  display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.list-overlay{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.25s}
 .list-overlay.active{opacity:1;pointer-events:all}
-.list-header{display:flex;align-items:center;justify-content:space-between;
-  padding:1.5rem 1.5rem 0;flex-shrink:0;max-width:440px;width:100%;margin:0 auto}
+.list-header{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.5rem 0;flex-shrink:0;max-width:440px;width:100%;margin:0 auto}
 .list-title{font-size:0.75rem;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mid)}
-.list-close{background:none;border:none;font-size:1rem;cursor:pointer;color:var(--ink-light);
-  padding:6px;line-height:1}
-.list-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
-  padding:0.75rem 1.5rem;flex-shrink:0;max-width:440px;width:100%;margin:0 auto}
+.list-close{background:none;border:none;font-size:1rem;cursor:pointer;color:var(--ink-light);padding:6px;line-height:1}
+.list-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0.75rem 1.5rem;flex-shrink:0;max-width:440px;width:100%;margin:0 auto}
 .list-filters::-webkit-scrollbar{display:none}
-.list-filter-btn{padding:5px 12px;border:0.5px solid var(--border-mid);background:transparent;
-  border-radius:99px;font-family:'DM Sans',sans-serif;font-size:0.68rem;font-weight:400;
-  letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;
-  transition:all 0.18s;white-space:nowrap;flex-shrink:0}
+.list-filter-btn{padding:5px 12px;border:0.5px solid var(--border-mid);background:transparent;border-radius:99px;font-family:inherit;font-size:0.68rem;font-weight:400;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;transition:all 0.18s;white-space:nowrap;flex-shrink:0}
 .list-filter-btn:hover{background:var(--surface)}
 .list-filter-btn.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .list-filter-btn.kids-active{background:var(--surface);border-color:var(--ink);color:var(--ink)}
-.list-count{padding:0 1.5rem 0.5rem;font-size:0.65rem;font-weight:300;
-  color:var(--ink-light);letter-spacing:0.05em;max-width:440px;width:100%;margin:0 auto}
-.list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 1.5rem 2rem;
-  max-width:440px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:1px}
-.list-item{padding:0.9rem 0;border-bottom:0.5px solid var(--border);cursor:pointer;
-  display:flex;align-items:flex-start;gap:0.85rem;transition:opacity 0.15s}
+.list-count{padding:0 1.5rem 0.5rem;font-size:0.65rem;font-weight:300;color:var(--ink-light);letter-spacing:0.05em;max-width:440px;width:100%;margin:0 auto}
+.list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 1.5rem 2rem;max-width:440px;width:100%;margin:0 auto;display:flex;flex-direction:column}
+.list-item{padding:0.9rem 0;border-bottom:0.5px solid var(--border);cursor:pointer;display:flex;align-items:flex-start;gap:0.85rem;transition:opacity 0.15s}
 .list-item:hover{opacity:0.65}
 .list-item:last-child{border-bottom:none}
-.list-item-suit{font-size:0.58rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
-  flex-shrink:0;margin-top:3px;min-width:60px}
-.list-item-prompt{font-size:0.92rem;font-weight:400;line-height:1.35;white-space:pre-line;flex:1}
+.list-item-suit{font-size:0.58rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;flex-shrink:0;margin-top:3px;min-width:60px}
+.list-item-prompt{font-size:0.92rem;font-weight:400;line-height:1.35;flex:1}
 .list-item-kids{font-size:0.6rem;color:var(--ink-light);flex-shrink:0;margin-top:3px}
-.list-item-fav{font-size:0.8rem;color:var(--ink-light);flex-shrink:0;margin-top:1px}
+.list-item-fav{font-size:0.8rem;color:var(--ink-light);flex-shrink:0;margin-top:1px;cursor:pointer;padding:2px 4px}
 .list-item-fav.active{color:#D4603A}
-
-/* ── PRESENT OVERLAY ── */
-.present-overlay{position:fixed;inset:0;background:var(--surface);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.present-overlay{position:fixed;inset:0;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s}
 .present-overlay.active{opacity:1;pointer-events:all}
-.present-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;
-  font-size:1.2rem;cursor:pointer;color:var(--ink-light);padding:8px;z-index:1}
-/* frente */
-.present-front,.present-back{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:3rem 2rem;width:100%;max-width:400px;text-align:center}
-.present-suit{font-size:0.7rem;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;
-  margin-bottom:1.5rem}
-.present-prompt{font-size:2.2rem;font-weight:400;line-height:1.25;letter-spacing:-0.02em;
-  white-space:pre-line}
-.present-kids-label{margin-top:1.5rem;font-size:0.65rem;letter-spacing:0.1em;
-  text-transform:uppercase;color:var(--ink-light)}
-/* verso apresentação */
-.present-back{display:none;text-align:left;gap:1.25rem;align-items:flex-start;
-  justify-content:center;overflow-y:auto;max-height:100vh}
-.present-back.visible{display:flex;flex-direction:column}
+.present-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--ink-light);padding:8px;z-index:1}
+.present-front{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;width:100%;max-width:400px;text-align:center}
+.present-suit{font-size:0.7rem;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:1.5rem}
+.present-prompt{font-size:2.2rem;font-weight:400;line-height:1.25;letter-spacing:-0.02em;white-space:pre-line}
+.present-kids-label{margin-top:1.5rem;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-light)}
+.present-back{display:none;flex-direction:column;gap:1.25rem;align-items:flex-start;padding:3rem 2rem 5rem;width:100%;max-width:400px;overflow-y:auto;max-height:100vh}
+.present-back.visible{display:flex}
 .present-front.hidden{display:none}
-.present-section-label{font-size:0.62rem;font-weight:500;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--ink-light);margin-bottom:0.4rem}
+.present-section-label{font-size:0.62rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.4rem}
 .present-why{font-size:1rem;line-height:1.65;color:var(--ink-mid);font-weight:300}
 .present-how{font-size:1rem;line-height:1.65;color:var(--ink);font-weight:300}
 .present-vars{display:flex;flex-direction:column;gap:0.6rem}
-.present-var{font-size:0.9rem;line-height:1.55;color:var(--ink-mid);font-style:italic;
-  font-weight:300;padding-left:1rem;border-left:2px solid var(--border-mid)}
-.present-flip-btn{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
-  padding:10px 24px;border:0.5px solid var(--border-mid);background:var(--surface);
-  border-radius:99px;font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:400;
-  letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;
-  transition:all 0.15s;white-space:nowrap}
+.present-var{font-size:0.9rem;line-height:1.55;color:var(--ink-mid);font-style:italic;font-weight:300;padding-left:1rem;border-left:2px solid var(--border-mid)}
+.present-flip-btn{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:10px 28px;border:0.5px solid var(--border-mid);background:var(--surface);border-radius:99px;font-family:inherit;font-size:0.72rem;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;transition:all 0.15s;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,0.08);z-index:1}
 .present-flip-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(12px);
-  background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;
-  font-size:0.72rem;letter-spacing:0.06em;opacity:0;transition:all 0.25s;
-  pointer-events:none;white-space:nowrap;z-index:400}
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:0.72rem;letter-spacing:0.06em;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;z-index:400}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-footer{padding:1rem 1.5rem 2.5rem;font-size:0.65rem;color:var(--ink-light);
-  letter-spacing:0.06em;font-weight:300;width:100%;max-width:440px;text-align:center}
+footer{padding:1rem 1.5rem 2.5rem;font-size:0.65rem;color:var(--ink-light);letter-spacing:0.06em;font-weight:300;width:100%;max-width:440px;text-align:center}
 </style>
 </head>
 <body>
-
 <header>
   <h1>Baralho Criativo</h1>
   <span class="counter-txt" id="counterTxt"></span>
 </header>
-
 <div class="stage">
   <div class="empty" id="emptyState">
     <p class="empty-hint">Toque em sortear para<br>receber um exercício.</p>
     <div class="cod-area" id="codArea"></div>
   </div>
-
-  <div class="card-wrap" id="cardWrap" style="display:none">
-    <div class="card-inner" id="cardInner">
-      <div class="card-face" id="cardFront"></div>
-      <div class="card-face card-back-face" id="cardBack"></div>
+  <div class="card-viewport" id="cardViewport" style="display:none">
+    <div class="card-wrap" id="cardWrap">
+      <div class="card-inner" id="cardInner">
+        <div class="card-face" id="cardFront"></div>
+        <div class="card-face card-back-face" id="cardBack"></div>
+      </div>
     </div>
   </div>
-
   <div class="history-wrap" id="historyWrap" style="display:none">
     <div class="history-label">Sessão</div>
     <div class="history-row" id="historyRow"></div>
   </div>
-
   <div class="fav-panel" id="favPanel">
     <div class="fav-panel-header">
       <div class="fav-panel-label">Favoritas</div>
@@ -285,19 +174,16 @@ footer{padding:1rem 1.5rem 2.5rem;font-size:0.65rem;color:var(--ink-light);
     </div>
     <div class="fav-chips" id="favChips"></div>
   </div>
-
   <div class="btn-row">
     <button class="draw-btn" id="drawBtn">Sortear carta</button>
-    <button class="icon-btn" id="listBtn" title="Lista de cartas">≡</button>
-    <button class="icon-btn" id="presentBtn" title="Modo apresentação">⤢</button>
-    <button class="icon-btn" id="favToggleBtn" title="Favoritas">♡</button>
+    <button class="icon-btn" id="listBtn" title="Lista">&#8801;</button>
+    <button class="icon-btn" id="presentBtn" title="Apresentacao">&#10562;</button>
+    <button class="icon-btn" id="favToggleBtn" title="Favoritas">&#9825;</button>
   </div>
 </div>
-
-<!-- Timer overlay -->
 <div class="timer-overlay" id="timerOverlay">
-  <div class="timer-suit" id="timerSuit"></div>
-  <div class="timer-prompt" id="timerPrompt"></div>
+  <div class="timer-suit-lbl" id="timerSuit"></div>
+  <div class="timer-prompt-lbl" id="timerPrompt"></div>
   <div class="timer-display" id="timerDisplay">00:00</div>
   <div class="timer-controls">
     <button class="timer-ctrl-btn" id="timerPauseBtn">Pausar</button>
@@ -305,394 +191,242 @@ footer{padding:1rem 1.5rem 2.5rem;font-size:0.65rem;color:var(--ink-light);
   </div>
   <div class="timer-progress" id="timerProgress"></div>
 </div>
-
-<!-- List overlay -->
 <div class="list-overlay" id="listOverlay">
   <div class="list-header">
     <span class="list-title">Todas as cartas</span>
-    <button class="list-close" id="listClose">✕</button>
+    <button class="list-close" id="listClose">&#10005;</button>
   </div>
-  <div class="list-filters" id="listFilters">
+  <div class="list-filters">
     <button class="list-filter-btn active" data-suit="TODOS">Todos</button>
     <button class="list-filter-btn" data-suit="OLHAR">Olhar</button>
     <button class="list-filter-btn" data-suit="CORPO">Corpo</button>
-    <button class="list-filter-btn" data-suit="EMOÇÃO">Emoção</button>
+    <button class="list-filter-btn" data-suit="EMOCAO">Emocao</button>
     <button class="list-filter-btn" data-suit="PARADOXO">Paradoxo</button>
     <button class="list-filter-btn" data-suit="TEMPO">Tempo</button>
     <button class="list-filter-btn" data-suit="PROCESSO">Processo</button>
-    <button class="list-filter-btn" data-suit="KIDS" id="listKidsBtn">★ crianças</button>
+    <button class="list-filter-btn" data-suit="KIDS" id="listKidsBtn">&#9733; criancas</button>
   </div>
   <div class="list-count" id="listCount"></div>
   <div class="list-scroll" id="listScroll"></div>
 </div>
-
-<!-- Presentation overlay -->
 <div class="present-overlay" id="presentOverlay">
-  <button class="present-close" id="presentClose">✕</button>
+  <button class="present-close" id="presentClose">&#10005;</button>
   <div class="present-front" id="presentFront">
-    <div class="present-suit" id="presentSuit"></div>
-    <div class="present-prompt" id="presentPrompt"></div>
-    <div class="present-kids-label" id="presentKids"></div>
+    <div class="present-suit" id="presentSuitEl"></div>
+    <div class="present-prompt" id="presentPromptEl"></div>
+    <div class="present-kids-label" id="presentKidsEl"></div>
   </div>
   <div class="present-back" id="presentBack"></div>
-  <button class="present-flip-btn" id="presentFlipBtn">Ver exercício →</button>
+  <button class="present-flip-btn" id="presentFlipBtn">Ver exercicio</button>
 </div>
-
 <div class="toast" id="toast"></div>
-
-<footer>Bruno Lorenz · @unspredinhos</footer>
-
+<footer>Bruno Lorenz &middot; @unspredinhos</footer>
 <script>
-const CARDS = [{"suit":"OLHAR","kids":true,"prompt":"Desenhe sem olhar\npara o papel.","time":"5–10 min","timeSec":420,"why":"Desconectar o olho do papel força a mão a realmente seguir o que você vê — não o que imagina que vê. O contorno cego é um dos exercícios mais reveladores sobre a diferença entre perceber e simbolizar.","how":"Posicione o papel fora do campo de visão. Observe o objeto ou a mão. Mova o lápis acompanhando os contornos com o olho — devagar. Só olhe para o resultado quando terminar.","variations":["Tente com um objeto que muda de ângulo enquanto você desenha.","Faça três vezes seguidas no mesmo papel — sobreponha os traços.","Use caneta: o erro é definitivo, o que libera."]},{"suit":"CORPO","kids":true,"prompt":"Use apenas a mão\nnão dominante.","time":"10–15 min","timeSec":750,"why":"A mão não dominante não tem hábito — e hábito é o maior inimigo da atenção. Sem o repertório automático, você é obrigado a olhar e a sentir cada traço.","how":"Troque o lápis para a mão oposta. Escolha um objeto simples. Desenhe devagar, sem pressa de controlar o resultado. Observe onde a mão quer ir sozinha.","variations":["Use a mão não dominante como aquecimento por uma semana inteira.","Compare um desenho de cada mão do mesmo objeto.","Tente assinar seu nome — observe o esforço consciente."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe o que está atrás\nde você sem virar.","time":"10–15 min","timeSec":750,"why":"Desenhar de memória imediata revela o que você realmente registra — e o que o cérebro inventa para preencher o que não viu. É um teste honesto de atenção ao espaço ao redor.","how":"Observe o ambiente à sua frente por 30 segundos. Sem virar, reconstrua o que está atrás. Depois vire e compare. Anote as diferenças — elas dizem o que você habitualmente ignora.","variations":["Faça em um ambiente novo: café, praça, sala desconhecida.","Repita no mesmo lugar uma semana depois — o que mudou na memória?","Peça para alguém descrever o que está atrás de você e compare."]},{"suit":"OLHAR","kids":true,"prompt":"Olhe por 30 segundos.\nDepois feche os olhos.\nDesenhe.","time":"10–15 min","timeSec":750,"why":"O intervalo entre ver e registrar mostra o que a percepção considera essencial. O que some em 30 segundos não tinha peso visual suficiente para ser retido.","how":"Observe a cena ou objeto em silêncio por exatamente 30 segundos. Feche os olhos. Desenhe tudo que ainda está presente. Olhe o original só depois.","variations":["Aumente para 60 segundos — note se o resultado melhora muito ou pouco.","Faça com um rosto: o que você retém em 30 segundos?","Repita o mesmo objeto três dias seguidos e compare."]},{"suit":"EMOÇÃO","kids":true,"prompt":"Desenhe o cheiro\ndo lugar onde\nvocê está.","time":"10–20 min","timeSec":900,"why":"Traduzir um sentido não-visual para o desenho força a invenção de uma linguagem própria — textura, ritmo, densidade — que não vem de nenhuma referência visual prévia.","how":"Respire fundo e preste atenção ao cheiro do ambiente. Não represente o objeto que causa o cheiro — desenhe a sensação em si: intensidade, direção, camadas.","variations":["Tente com um cheiro de memória — infância, lugar específico, pessoa.","Compare como duas pessoas diferentes desenham o mesmo cheiro.","Faça em série: o mesmo lugar em épocas diferentes do ano."]},{"suit":"PARADOXO","kids":true,"prompt":"O erro é\no começo.","time":"Livre","timeSec":0,"why":"Tratar o erro como ponto de partida — e não como interrupção — muda completamente a relação com o processo. O que parecia errado revela possibilidades que o traço certo nunca abriria.","how":"Faça um traço qualquer — sem intenção. Observe: o que esse traço pode virar? Deixe o erro conduzir a próxima decisão. Continue até o papel estar completo.","variations":["Faça um borrão intencional e construa a partir dele.","Dê o papel para outra pessoa estragar e depois retome.","Use o lado errado do papel como regra."]},{"suit":"TEMPO","kids":true,"prompt":"Faça o traço mais\nlento que conseguir.","time":"5–10 min","timeSec":420,"why":"A velocidade mínima possível exige presença total. Cada milímetro do traço passa a ter peso e intenção — é o oposto do gesto automático.","how":"Escolha um percurso simples: o contorno de uma xícara, uma linha reta de 10cm. Faça esse traço no tempo mais lento possível sem levantar o lápis. Observe a resistência interna.","variations":["Faça o mesmo traço em velocidade normal depois — compare a atenção.","Tente com olhos fechados no mesmo ritmo lento.","Use um metrônomo: um traço por batida."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Desenhe um sentimento\nsem usar formas\nreconhecíveis.","time":"10–20 min","timeSec":900,"why":"Abstrair completamente obriga a encontrar equivalentes visuais para estados internos — ritmo, pressão, densidade, direção. É onde o desenho se aproxima da música.","how":"Escolha um sentimento presente agora. Sem representar nada concreto: como é a intensidade? Tem direção? É pesado ou leve? Ocupa o centro ou as bordas? Deixe a mão responder.","variations":["Faça a mesma emoção em três tamanhos diferentes de papel.","Compare como outra pessoa desenha a mesma emoção.","Desenhe a emoção oposta em seguida no mesmo papel."]},{"suit":"TEMPO","kids":false,"prompt":"Termine antes de\nquerer terminar.","time":"Livre","timeSec":0,"why":"Parar antes do ponto de satisfação treina a tolerância ao inacabado — e muitas vezes o que resta é mais vivo do que o que seria completado. A contenção é uma habilidade técnica.","how":"Comece sem definir o tempo. Quando sentir que está chegando perto de terminar — pare agora. Não adicione mais nada. Observe o resultado por um minuto inteiro.","variations":["Determine de antemão: farei apenas 5 traços.","Use um timer: quando tocar, a mão para — mesmo no meio de uma linha.","Faça uma série: 5 desenhos interrompidos do mesmo sujeito."]},{"suit":"PROCESSO","kids":true,"prompt":"Copie algo que está\nna sala — mas mude\numa coisa.","time":"10–20 min","timeSec":900,"why":"A regra da mudança única força uma decisão consciente sobre o que é essencial no objeto e o que é acidental. Copiar com alteração intencional é análise disfarçada de jogo.","how":"Encontre algo na sala para copiar. Antes de começar, decida: qual propriedade você vai mudar? Tamanho, proporção, textura, posição, gravidade? Mantenha tudo mais fiel possível — exceto isso.","variations":["Mude duas coisas — veja onde o objeto deixa de ser reconhecível.","Copie três vezes, mudando algo diferente em cada uma.","Deixe outra pessoa decidir o que muda."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe com os olhos\nfechados do início\nao fim.","time":"5–10 min","timeSec":420,"why":"Sem referência visual, o desenho vira puro gesto e tato — a relação entre a mão, o lápis e o papel fica em primeiro plano. O resultado conta a história do movimento, não da forma.","how":"Feche os olhos antes de encostar o lápis no papel. Desenhe qualquer coisa — um objeto imaginado, uma cena. Não abra os olhos até considerar terminado. Só então olhe.","variations":["Faça com alguém descrevendo verbalmente o que você deve desenhar.","Tente um autorretrato de olhos fechados.","Repita três vezes seguidas — observe como a mão aprende o caminho."]},{"suit":"PROCESSO","kids":true,"prompt":"Use só\nlinhas retas.","time":"10–15 min","timeSec":750,"why":"A restrição da linha reta obriga a encontrar soluções angulares para formas curvas — e revela o quanto da curva é realmente necessária. É um treino de síntese e geometria intuitiva.","how":"Escolha qualquer objeto ou cena. A regra: o lápis só anda em linha reta. Nenhuma curva. Use quantas linhas precisar, em qualquer direção e comprimento.","variations":["Limite ainda mais: só horizontais e verticais — sem diagonais.","Use apenas linhas longas: mínimo de 5cm cada.","Tente um rosto humano — onde o reto falha e o que isso revela?"]},{"suit":"PROCESSO","kids":true,"prompt":"Use só\nlinhas curvas.","time":"10–15 min","timeSec":750,"why":"Sem ângulo, tudo flui. A curva tem natureza orgânica e rítmica — forçar tudo a ser curvo revela a tensão entre o que é fluido e o que exige decisão.","how":"Nenhuma linha reta, nenhum ângulo. Tudo é curva. Tente o mesmo objeto que você desenhou só com retas e compare.","variations":["Alterne: uma curva longa, uma curva curta, repetindo.","Use apenas espirais — cada forma começa e termina em espiral.","Faça uma paisagem urbana só com curvas."]},{"suit":"PROCESSO","kids":false,"prompt":"Começa pelo detalhe\nmais irrelevante.","time":"15–25 min","timeSec":1200,"why":"Começar pelo detalhe periférico inverte a hierarquia habitual — e frequentemente revela que não existe detalhe irrelevante. O que parecia marginal passa a organizar o todo.","how":"Olhe para o objeto ou cena e identifique o menor detalhe, o mais insignificante. Comece por ele. Deixe o desenho crescer a partir dessa periferia em direção ao centro.","variations":["Comece por três detalhes irrelevantes antes de qualquer forma principal.","Faça o mesmo objeto começando pelo mais relevante — compare.","Deixe o detalhe periférico ocupar metade do papel."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o espaço\nentre as coisas,\nnão as coisas.","time":"10–20 min","timeSec":900,"why":"Ver o espaço negativo desativa os atalhos simbólicos que substituem a percepção real pela memória de como as coisas deveriam parecer. O negativo mostra o que o positivo esconde.","how":"Escolha um objeto com silhueta complexa: cadeira, planta, bicicleta. Em vez de contornar o objeto, preencha os espaços ao redor e entre suas partes. O objeto surgirá em branco.","variations":["Use aquarela para preencher os negativos — o peso muda o ritmo.","Fotografe e inverta as cores — objeto e fundo trocam de lugar.","Tente com letras: desenhe os espaços dentro e entre elas."]},{"suit":"PARADOXO","kids":true,"prompt":"Deixe o papel em\nbranco em mais\nda metade.","time":"10–20 min","timeSec":900,"why":"A maioria das pessoas usa o papel como espaço a ser preenchido. Impor o branco como regra obriga a pensar em peso visual, respiração e onde a presença de um traço cria mais tensão.","how":"Antes de começar, decida: mais de 50% ficará vazio. Decida o que vai desenhar e onde esse elemento vai habitar o papel. Respeite o branco como parte do desenho.","variations":["Limite a apenas 10% do papel: um canto, uma faixa estreita.","Use o papel na vertical — observe como muda a economia de espaço.","Coloque o elemento principal no canto mais extremo."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Desenhe algo que\nsó existe na\nsua memória.","time":"15–25 min","timeSec":1200,"why":"Desenhar de memória pura mostra o que ficou, o que foi reconstruído e o que foi completamente inventado pelo cérebro. A memória é criativa mesmo quando não quer ser.","how":"Escolha um lugar, pessoa ou objeto que você não pode consultar agora. Desenhe a partir do que está disponível internamente. Não busque referência — o que a memória oferece é o material.","variations":["Compare com uma foto depois — identifique o que você amplificou, apagou ou inventou.","Repita o mesmo objeto depois de uma semana: o que muda na memória?","Peça para alguém que conhece o mesmo lugar desenhar — compare."]},{"suit":"PROCESSO","kids":true,"prompt":"Repita o mesmo\ntraço 20 vezes.","time":"10–15 min","timeSec":750,"why":"A repetição expõe a variação — cada traço igual é ligeiramente diferente. Com 20 repetições, padrões emergem: onde a mão acelera, onde hesita, onde encontra seu ritmo natural.","how":"Escolha um traço simples: uma curva, um ângulo, uma letra. Faça exatamente 20 vezes, uma ao lado da outra. Observe como o traço muda do primeiro ao último.","variations":["Repita 20 vezes acelerando progressivamente — do mais lento ao mais rápido.","Faça 20 vezes só com pressão variando — do mais leve ao mais pesado.","Repita o mesmo traço em 20 papéis diferentes."]},{"suit":"CORPO","kids":true,"prompt":"Desenhe com a cabeça\nvirada para\no outro lado.","time":"5–10 min","timeSec":420,"why":"Dissociar cabeça e mão — dois sistemas que normalmente trabalham juntos — cria uma fricção produtiva. A atenção precisa se dividir e isso revela como os dois processos dependem um do outro.","how":"Vire a cabeça para um lado enquanto a mão desenha do outro. Observe a dificuldade: ela é visual, motora ou de atenção? Não corrija — continue com a cabeça virada.","variations":["Feche um olho e vire a cabeça para o lado oposto ao olho aberto.","Tente escrever seu nome com a cabeça virada.","Faça por 5 minutos seguidos — observe se a dificuldade diminui."]},{"suit":"PARADOXO","kids":false,"prompt":"Que forma teria\no silêncio?","time":"Livre","timeSec":0,"why":"Perguntas sem resposta correta abrem o espaço para escolhas inteiramente pessoais — e revelam o vocabulário visual que cada pessoa desenvolveu para o que não pode ser nomeado diretamente.","how":"Não responda com palavras — responda com o desenho. Não existe certo ou errado. Deixe a pergunta ficar sem solução verbal enquanto a mão trabalha. Observe as decisões que surgem.","variations":["Depois, pergunte: que forma teria o barulho? Compare os dois.","Faça em grupo e compare as respostas visuais.","Desenhe o silêncio de um lugar específico que você conhece."]},{"suit":"TEMPO","kids":true,"prompt":"Desenhe devagar o\nque você normalmente\nfaria rápido.","time":"10–20 min","timeSec":900,"why":"Cada gesto habitual carrega uma velocidade inscrita. Forçar o oposto expõe quanto do resultado depende do tempo — e o quanto o ritmo é uma escolha técnica, não uma necessidade.","how":"Identifique algo que você costuma desenhar rapidamente: um rosto esquemático, uma árvore. Faça o mesmo no tempo mínimo possível. Observe o que aparece que normalmente não apareceria.","variations":["Faça em três velocidades: lento, normal, rápido. Compare os três.","Use um metrônomo para impor um ritmo fixo e incomum.","Grave em vídeo — observe como o ritmo muda o gesto."]},{"suit":"OLHAR","kids":true,"prompt":"Feche um olho.\nDesenhe.","time":"10–15 min","timeSec":750,"why":"Com um olho fechado, a visão binocular — responsável pela percepção de profundidade — se desativa. O espaço achatado que resulta é mais próximo do que o papel pode representar do que a visão normal.","how":"Feche um olho e mantenha assim durante o desenho. Observe o achatamento do espaço. Compare depois com um esboço feito com os dois olhos.","variations":["Troque o olho que fica aberto na metade do desenho — note a diferença de ângulo.","Tente com objetos em diferentes distâncias: perto, médio, longe.","Use o exercício para estudar perspectiva intuitiva."]},{"suit":"CORPO","kids":true,"prompt":"Use o dedo no\nlugar do lápis.","time":"10–15 min","timeSec":750,"why":"O dedo tem atrito, temperatura e sensação que o lápis não tem. Desenhar com ele muda a relação com o suporte — o papel deixa de ser distante e vira parte do gesto.","how":"Use o dedo direto no papel — com grafite, carvão, aquarela ou a sujeira do próprio dedo. Observe a diferença de pressão e largura em relação ao lápis.","variations":["Use diferentes dedos: polegar, indicador, mínimo — cada um tem espessura diferente.","Tente com a palma inteira para grandes massas de valor.","Combine dedo e lápis no mesmo desenho."]},{"suit":"PROCESSO","kids":true,"prompt":"Comece de um ponto\nqualquer no centro\nda folha.","time":"10–20 min","timeSec":900,"why":"Começar pelo centro rompe a leitura linear ocidental do papel e força a pensar em expansão radial, onde o desenho cresce em todas as direções ao mesmo tempo.","how":"Faça um ponto no centro exato do papel. A partir daí, o desenho só pode crescer para fora — em qualquer direção, mas sempre expandindo. Não volte ao centro depois de sair.","variations":["Faça 5 pontos espalhados pelo papel e construa a partir de todos simultaneamente.","Comece pelo canto — e vá em direção ao centro. Compare as duas abordagens.","Tente sem levantar o lápis: uma linha espiral do centro para fora."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe o que está\ndiretamente\nacima de você.","time":"10–20 min","timeSec":900,"why":"O plano aéreo raramente é observado — e desenhar o teto, o céu ou a copa das árvores força a reorganizar toda a relação entre o corpo, o espaço e o papel.","how":"Deite-se ou incline a cabeça para trás. Observe o que está exatamente acima de você. Desenhe essa vista — com o papel na horizontal sobre o peito, se quiser manter a relação espacial.","variations":["Faça deitado na rua, em uma praça, em uma floresta — compare os três tetos.","Fotografe e desenhe depois: o que a foto preservou que você não viu?","Tente na chuva — o céu como plano dinâmico."]},{"suit":"PROCESSO","kids":true,"prompt":"Escolha uma cor\ne use só ela.","time":"15–25 min","timeSec":1200,"why":"A restrição cromática obriga a encontrar dentro de um único pigmento toda a variação necessária: pressão, diluição, sobreposição, ausência. É onde a limitação revela o potencial.","how":"Escolha uma cor — qualquer uma. Essa é a única cor do desenho. Explore toda a variação possível: pressão, água, sobreposição, área coberta, borda seca versus úmida.","variations":["Escolha uma cor que não combinaria com o assunto — veja o que acontece.","Tente com preto: quantas cores existem dentro do preto?","Use a mesma cor em dois papéis de cores diferentes."]},{"suit":"PARADOXO","kids":false,"prompt":"O que você não sabe\ndesenhar —\ndesenhe isso.","time":"Livre","timeSec":0,"why":"O repertório de evitação é tão importante quanto o de domínio. O que evitamos desenhar revela os limites que definimos para nós mesmos — cruzá-los, mesmo mal, é sempre revelador.","how":"Identifique honestamente algo que você evita desenhar. Comece — mesmo sem saber como. Não pesquise referência antes. Deixe a dificuldade aparecer sem tentar contorná-la.","variations":["Faça uma lista de 5 coisas que você evita e sorteie.","Repita o mesmo tema 10 dias seguidos — observe a transformação.","Compare o primeiro com o décimo."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Desenhe\no peso de algo.","time":"10–20 min","timeSec":900,"why":"Peso é uma qualidade que o desenho costuma ignorar — representamos formas, não forças. Traduzir gravidade para o papel exige reinventar a relação entre linha, mancha e espaço.","how":"Escolha algo que tem peso real ou metafórico: uma pedra, uma palavra, uma notícia. Desenhe não a forma do objeto — mas a sensação de segurar esse peso.","variations":["Compare o peso de dois objetos parecidos mas com pesos físicos diferentes.","Desenhe algo leve depois — use o contraste.","Represente o peso crescendo: uma pedra que vai afundando."]},{"suit":"PROCESSO","kids":false,"prompt":"Faça uma linha\nque nunca\nse repita.","time":"5–15 min","timeSec":600,"why":"Toda linha tem uma textura de decisão — pressão, velocidade, direção. Impor que ela nunca repita nenhuma qualidade obriga a uma atenção contínua a cada milímetro do traço.","how":"Comece a linha. A regra: ela nunca pode repetir nenhuma característica — pressão, velocidade, curvatura, direção devem variar constantemente. Observe onde a atenção cansa.","variations":["Faça duas linhas que nunca se repetem — e que nunca se cruzam.","Tente por 5 minutos sem parar.","Use a linha como único elemento de um desenho completo."]},{"suit":"PARADOXO","kids":false,"prompt":"Desenhe a mesma\ncoisa duas vezes —\ndiferente.","time":"15–25 min","timeSec":1200,"why":"A impossibilidade do exercício é o ponto: o mesmo objeto nunca pode ser desenhado de novo — o tempo, a atenção e a mão já mudaram. O que muda revela o que estava vivo no primeiro.","how":"Desenhe algo. Observe o resultado. Agora desenhe de novo — com a intenção de fazer diferente, mas sem mudar o sujeito. Compare: o que mudou sem você ter decidido?","variations":["Faça 5 vezes o mesmo objeto: observe a curva de transformação.","Faça com 5 anos de intervalo — guarde o primeiro.","Peça para outra pessoa fazer diferente do que você fez."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Que forma tem\na saudade?","time":"Livre","timeSec":0,"why":"A saudade é difusa, temporal e corporal ao mesmo tempo. Tentar desenhá-la é construir uma linguagem particular para algo que o idioma visual ainda não nomeou.","how":"Não escolha o objeto da saudade para desenhar — escolha a saudade em si. Como ela ocupa o espaço? Tem bordas ou é difusa? Está em movimento ou parada?","variations":["Compare com alguém: a saudade de cada pessoa tem forma diferente?","Desenhe a saudade de um lugar, de uma pessoa e de um tempo — são formas diferentes?","Repita em datas diferentes."]},{"suit":"CORPO","kids":true,"prompt":"Desenhe em ritmo\nde respiração.","time":"10–15 min","timeSec":750,"why":"A respiração é o metrônomo mais acessível e mais esquecido. Sincronizar o traço com o ritmo do corpo cria uma qualidade de atenção diferente — mais lenta, mais presente, mais incorporada.","how":"Inspire e faça um traço. Expire e faça outro. O traço segue o ritmo da respiração — não force a respiração a seguir o traço. Observe como o desenho muda com respirações calmas ou agitadas.","variations":["Faça o mesmo desenho depois de uma corrida — compare o resultado.","Use a expiração para os traços principais e a inspiração para os secundários.","Tente com olhos fechados."]},{"suit":"PARADOXO","kids":false,"prompt":"Comece\npelo fim.","time":"15–25 min","timeSec":1200,"why":"Saber onde o desenho vai terminar antes de começar inverte toda a lógica de construção. O que normalmente é consequência torna-se ponto de partida — e o processo de chegada precisa ser reinventado.","how":"Decida onde o desenho vai terminar — qual será o último traço, o último elemento. Faça esse elemento primeiro. Agora construa tudo o que precisava existir antes dele.","variations":["Defina os dois extremos — primeiro e último traço — e construa o meio.","Tente com um autorretrato: o que seria o fim de um rosto?","Faça em dois sentidos com dois lápis ao mesmo tempo."]},{"suit":"PROCESSO","kids":true,"prompt":"Use o papel de um\njeito que ele não\nfoi feito para ser\nusado.","time":"Livre","timeSec":0,"why":"O suporte tem suas próprias regras implícitas — e quebrá-las expõe o quanto dessas regras você estava seguindo sem perceber. O papel dobrado, rasgado, molhado ou em pé é outro papel.","how":"Antes de desenhar, faça algo ao papel que não é esperado: dobre, rasgue, molhe, amasse, corte, cole sobre outro. Só então desenhe — levando em conta o que o papel agora é.","variations":["Desenhe nas duas faces ao mesmo tempo — vire enquanto desenha.","Use o rasgo como elemento: onde o papel termina, o traço continua.","Amasse completamente e abra — desenhe seguindo os vincos."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o movimento\nde algo que\nestá parado.","time":"15–25 min","timeSec":1200,"why":"Todo objeto parado carrega marcas do movimento que o criou ou do movimento que está por vir. Ver essas forças congeladas exige uma leitura que vai além do contorno.","how":"Escolha algo estático: pedra, cadeira, tecido dobrado. Observe as forças presentes: tensão, compressão, equilíbrio, colapso iminente. Desenhe essas forças — não as formas.","variations":["Desenhe a trajetória que um objeto fez para chegar onde está.","Imagine o próximo movimento e desenhe-o junto com o presente.","Compare um objeto natural com um manufaturado — as forças são diferentes?"]},{"suit":"CORPO","kids":true,"prompt":"Deixe a mão andar\nsem destino\npor um minuto.","time":"1–3 min","timeSec":120,"why":"A mão sem instrução revela seu repertório espontâneo — os traços que ela já sabe fazer sem que a mente ordene. Esse vocabulário automático é o ponto de partida para encontrar seu estilo.","how":"Coloque o lápis no papel. Durante um minuto, deixe a mão se mover sem nenhuma intenção — nem abstrato, nem figurativo. Depois observe: o que a mão escolheu?","variations":["Faça com olhos fechados.","Repita toda semana por um mês — compare os resultados.","Use como aquecimento antes de qualquer sessão de desenho."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o que está\nfora do\nenquadramento.","time":"10–20 min","timeSec":900,"why":"O enquadramento é uma decisão — e o que fica de fora é tão real quanto o que foi incluído. Treinar o olho para o fora-de-campo expande a percepção espacial e questiona a naturalidade de qualquer corte.","how":"Olhe para uma cena através de um enquadramento: janela, mãos em moldura, câmera. Identifique o que está logo fora do corte. Desenhe apenas o que não entra no enquadramento.","variations":["Desenhe a continuação de uma fotografia: o que está além das bordas?","Mude o enquadramento — desenhe o que era fora-de-campo como se fosse o centro.","Use um espelho para ver o que está atrás enquanto enquadra a frente."]},{"suit":"EMOÇÃO","kids":true,"prompt":"Que textura\ntem hoje?","time":"10–15 min","timeSec":750,"why":"O dia tem qualidades sensoriais que raramente são nomeadas — e muito menos desenhadas. Traduzir a textura do tempo presente para o papel é uma forma de atenção plena com instrumentos de desenho.","how":"Pare por um momento. Como é a textura deste dia — não o que você esperava, mas o que está acontecendo agora? Rugoso, liso, úmido, seco, granulado, macio? Desenhe essa textura.","variations":["Faça toda semana — compare as texturas ao longo do tempo.","Desenhe a textura de um dia muito diferente deste.","Descreva em palavras depois de desenhar — compare as duas descrições."]},{"suit":"PARADOXO","kids":false,"prompt":"Faça uma escolha\nruim de propósito.","time":"10–20 min","timeSec":900,"why":"A escolha ruim no desenho costuma ser qualquer coisa que foge da expectativa técnica. Fazê-la com intenção transforma o erro em ferramenta — frequentemente o ruim era apenas inesperado.","how":"Identifique o que seria a escolha errada neste desenho: cor errada, proporção errada, técnica inapropriada. Faça essa escolha deliberadamente. Depois tente justificá-la.","variations":["Faça todas as escolhas ruins em sequência — o resultado final é o experimento.","Repita a escolha ruim 10 vezes até ela virar uma técnica.","Mostre para alguém sem contar — veja se percebem o intencional."]},{"suit":"TEMPO","kids":false,"prompt":"Desenhe mais rápido\ndo que consegue\npensar.","time":"15 seg × 10","timeSec":150,"why":"A velocidade que supera o pensamento elimina a mediação conceitual — o que aparece no papel não passou pelo filtro da intenção. É o estado onde o gesto mais revela.","how":"Use um temporizador: 15 ou 30 segundos por desenho. Repita 10 vezes seguidas sem olhar os resultados. Só então veja todos juntos.","variations":["30 retratos em 30 segundos cada.","Uma paisagem inteira em 45 segundos.","Aumente progressivamente: 15, 30, 45, 60 — observe onde a qualidade muda."]},{"suit":"TEMPO","kids":false,"prompt":"Interrompa antes de\nsentir que acabou.","time":"Livre","timeSec":0,"why":"O momento antes do fim é onde o desenho ainda está vivo — tenso, com possibilidades abertas. Aprender a parar ali é aprender que o inacabado pode ser mais expressivo que o completo.","how":"Comece a desenhar sem definir o fim. Preste atenção interna: quando sentir que está quase terminando — pare agora. Não adicione mais nada. Observe.","variations":["Faça uma série de 5 desenhos interrompidos do mesmo sujeito — compare onde cada um parou.","Peça para outra pessoa dizer quando parar.","Guarde por uma semana e veja se sente vontade de continuar."]},{"suit":"PROCESSO","kids":true,"prompt":"Deixe o papel decidir\na direção.","time":"Livre","timeSec":0,"why":"O papel tem qualidades físicas — textura, bordas, vincos, manchas — que podem ser interlocutores do desenho em vez de fundo passivo. Deixar o suporte conduzir é uma prática de escuta.","how":"Antes de desenhar, observe o papel com atenção: há marcas, dobras, textura irregular? Deixe essas qualidades sugerir onde começar e para onde ir. O papel já está falando — escute.","variations":["Use papel encontrado: embrulho, papel de pão, jornal, envelope usado.","Tente com papel molhado: ele literalmente decide o que acontece.","Use o verso de um desenho antigo — o passado entra no presente."]},{"suit":"CORPO","kids":false,"prompt":"Desenhe com o ombro,\nnão com o pulso.","time":"10–20 min","timeSec":900,"why":"A maioria dos traços cotidianos vem do pulso — pequenos, controlados, locais. Usar o ombro como articulação principal libera traços maiores, mais conectados ao corpo inteiro e com outra qualidade de energia.","how":"Use papel grande ou superfície vertical. Mova o lápis a partir do ombro — sem dobrar o pulso. O cotovelo pode dobrar, mas a força e a direção vêm de cima.","variations":["Tente com o braço completamente estendido — pulso e cotovelo travados.","Use superfície vertical (parede, cavalete) — muda completamente a mecânica.","Alterne ombro e pulso no mesmo desenho."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Que cor tem um barulho\nque incomoda?","time":"10–15 min","timeSec":750,"why":"Sinestesia — a tradução de um sentido para outro — é um exercício de invenção de linguagem. Não existe resposta certa: existe a resposta que revela como você conecta percepções.","how":"Pense em um barulho que te incomoda. Não represente a fonte do barulho — represente a cor da sensação que ele cria. Escolha pigmentos, aplique, e observe se a cor captura algo real.","variations":["Faça para um barulho agradável — compare as cores.","Faça em grupo: cada pessoa ouve o mesmo barulho e escolhe uma cor diferente.","Tente com um cheiro, um gosto, uma sensação tátil."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe algo que você\nnunca reparou antes.","time":"10–20 min","timeSec":900,"why":"A atenção tem rotas habituais — e o que não está na rota é invisível. Escolher ativamente o que nunca foi visto é um ato de renovação da percepção.","how":"Procure em volta: o que nunca recebeu sua atenção? Um detalhe de infraestrutura, uma sombra regular, uma mancha no teto. Observe por 2 minutos antes de desenhar.","variations":["Faça em um lugar que você conhece muito bem — o invisível está mais escondido onde nos sentimos em casa.","Fotografe antes de desenhar — compare o que a câmera viu e o que o olho escolheu.","Faça todo dia por uma semana: um detalhe nunca visto."]},{"suit":"PARADOXO","kids":false,"prompt":"Menos é mais —\nou talvez não.","time":"Livre","timeSec":0,"why":"A questão não tem resposta — e essa é a questão. Decidir onde está o menos é mais e onde ele falha é uma escolha estética que cada desenho exige. O exercício é tomar essa decisão conscientemente.","how":"Comece com a intenção de máxima economia: o mínimo de traços possível. A partir do momento em que você sentir que menos não está servindo — adicione. Observe onde está essa fronteira.","variations":["Faça o oposto: comece com excesso deliberado e vá removendo.","Compare os dois processos e os dois resultados.","Defina de antemão: este desenho terá exatamente 7 traços."]},{"suit":"TEMPO","kids":false,"prompt":"Desenhe o tempo que\nestá passando agora.","time":"Livre","timeSec":0,"why":"O tempo é invisível mas deixa rastros — no corpo, na luz, no cansaço, na atenção. Torná-lo visível exige inventar um sistema de registro que não existe antes de você criá-lo.","how":"Não represente um relógio ou uma ampulheta — represente o tempo como qualidade presente. Que forma tem essa hora do dia? Deixe o desenho durar enquanto você faz.","variations":["Faça um desenho por hora durante um dia — compare.","Um desenho feito em exatamente 7 minutos, outro em 30.","Desenhe no momento em que o dia muda de qualidade."]},{"suit":"PROCESSO","kids":false,"prompt":"Apague mais do\nque desenhou.","time":"15–25 min","timeSec":1200,"why":"O apagamento é uma ferramenta, não um erro. Desenhar com a borracha como instrumento principal inverte a lógica aditiva e revela formas que surgem por subtração — como escultura.","how":"Cubra o papel com grafite ou carvão. Use a borracha como se fosse o lápis — ela é o instrumento que cria. O que você remove é o desenho. Apague mais do que o que resta marcado.","variations":["Use diferentes tipos de borracha: dura, maleável, de vinil — cada uma tem uma qualidade de traço diferente.","Combine: desenhe, apague, desenhe sobre o apagado.","Faça um autorretrato só com apagamento."]},{"suit":"EMOÇÃO","kids":false,"prompt":"Desenhe a sensação\nde esperar.","time":"Livre","timeSec":0,"why":"Esperar tem textura, ritmo e espacialidade próprios — a dilatação do tempo, a atenção dividida, o corpo em suspensão. Traduzir isso para o papel exige inventar marcas visuais de uma experiência que se sente, não se vê.","how":"Pense em uma espera real: fila, consultório, mensagem sem resposta. Desenhe não o lugar — mas a qualidade interna da espera. Como o tempo se comporta? Onde fica no corpo?","variations":["Compare a espera ansiosa com a espera calma — são visualmente diferentes?","Desenhe enquanto espera de verdade — deixe o contexto entrar no papel.","Faça em série: 5 esperas diferentes da sua vida."]},{"suit":"PROCESSO","kids":true,"prompt":"Inverta o papel.\nContinue.","time":"Livre","timeSec":0,"why":"Virar o papel muda a relação com o que já foi feito — o que era certo fica de cabeça para baixo, e novas relações emergem. É uma forma de ver o trabalho em progresso com olhos renovados.","how":"Comece um desenho. Em algum momento, vire o papel 180 graus. Continue nessa nova orientação. Deixe que as marcas já feitas ganhem novos significados.","variations":["Vire 90 graus em vez de 180.","Vire mais de uma vez — cada virada muda a lógica.","Fotografe a cada virada e compare as fases."]},{"suit":"PROCESSO","kids":true,"prompt":"Escreva uma palavra.\nTransforme-a\nem desenho.","time":"10–20 min","timeSec":900,"why":"A fronteira entre escrita e desenho é histórica e arbitrária — toda escrita começou como desenho. Cruzar essa fronteira de volta revela o quanto a letra já é uma forma visual com geometria, ritmo e personalidade.","how":"Escolha uma palavra qualquer — ou deixe surgir. Escreva-a. Agora transforme cada letra em forma visual: expanda, distorça, deixe crescer até que a palavra seja um desenho.","variations":["Use uma palavra que descreve o que você está sentindo agora.","Faça com o nome de alguém — veja o que emerge.","Comece pelo desenho e transforme-o em escrita: o caminho inverso."]},{"suit":"EMOÇÃO","kids":true,"prompt":"Desenhe como se\nninguém fosse ver.","time":"Livre","timeSec":0,"why":"A audiência imaginária muda tudo: a escolha do sujeito, o nível de risco, a tolerância ao erro. Remover essa audiência — mesmo como exercício mental — abre espaços que o olhar dos outros fecha.","how":"Antes de começar, repita para si: ninguém vai ver isso. Pode rasgar depois. Isso não existe para ninguém além de você agora. Depois desenhe — o que quer que venha.","variations":["Efetivamente destrua o desenho depois — rasque, queime, jogue fora.","Faça em um caderno que nunca mostrará para ninguém.","Repita toda semana."]},{"suit":"PARADOXO","kids":false,"prompt":"O que seria um\ntraço honesto?","time":"Livre","timeSec":0,"why":"A honestidade no desenho não é técnica — é uma relação entre a intenção, o gesto e o resultado. Perguntar o que seria um traço honesto é perguntar onde estamos quando estamos desenhando.","how":"Não responda antes de desenhar. Faça um traço — qualquer um. Depois pergunte: esse traço foi honesto? Faça outro com essa consciência. Observe o que muda.","variations":["Faça um traço desonesto de propósito — compare.","Repita a pergunta em diferentes materiais: o traço honesto muda com o instrumento?","Pergunte no final de uma sessão longa: qual foi o traço mais honesto?"]},{"suit":"PARADOXO","kids":false,"prompt":"Desenhe tudo o que\nnão cabe na folha.","time":"Livre","timeSec":0,"why":"O impossível como instrução libera — porque não existe certo ou errado quando a tarefa é por definição irrealizável. O que aparece no papel quando se tenta o impossível é sempre mais interessante.","how":"O que não cabe: o infinito, o que está atrás das paredes, o que está acontecendo em outro lugar agora, o passado inteiro deste lugar. Escolha um impossível e tente.","variations":["O que não cabe em tamanho: desenhe o oceano, o sistema solar, a cidade inteira.","O que não cabe em tempo: desenhe os próximos cem anos deste lugar.","O que não cabe em dimensão: desenhe o interior de uma pedra."]}];
+const CARDS=[{"suit":"OLHAR","kids":true,"prompt":"Desenhe sem olhar\npara o papel.","time":"5-10 min","timeSec":420,"why":"Desconectar o olho do papel forca a mao a realmente seguir o que voce ve - nao o que imagina que ve. O contorno cego e um dos exercicios mais reveladores sobre a diferenca entre perceber e simbolizar.","how":"Posicione o papel fora do campo de visao. Observe o objeto ou a mao. Mova o lapis acompanhando os contornos com o olho - devagar. So olhe para o resultado quando terminar.","variations":["Tente com um objeto que muda de angulo enquanto voce desenha.","Faca tres vezes seguidas no mesmo papel - sobreponha os tracos.","Use caneta: o erro e definitivo, o que libera."]},{"suit":"CORPO","kids":true,"prompt":"Use apenas a mao\nnao dominante.","time":"10-15 min","timeSec":750,"why":"A mao nao dominante nao tem habito - e habito e o maior inimigo da atencao. Sem o repertorio automatico, voce e obrigado a olhar e a sentir cada traco.","how":"Troque o lapis para a mao oposta. Escolha um objeto simples. Desenhe devagar, sem pressa de controlar o resultado. Observe onde a mao quer ir sozinha.","variations":["Use a mao nao dominante como aquecimento por uma semana inteira.","Compare um desenho de cada mao do mesmo objeto.","Tente assinar seu nome - observe o esforco consciente."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe o que esta atras\nde voce sem virar.","time":"10-15 min","timeSec":750,"why":"Desenhar de memoria imediata revela o que voce realmente registra - e o que o cerebro inventa para preencher o que nao viu. E um teste honesto de atencao ao espaco ao redor.","how":"Observe o ambiente a sua frente por 30 segundos. Sem virar, reconstrua o que esta atras. Depois vire e compare. Anote as diferencas - elas dizem o que voce habitualmente ignora.","variations":["Faca em um ambiente novo: cafe, praca, sala desconhecida.","Repita no mesmo lugar uma semana depois - o que mudou na memoria?","Peca para alguem descrever o que esta atras de voce e compare."]},{"suit":"OLHAR","kids":true,"prompt":"Olhe por 30 segundos.\nDepois feche os olhos.\nDesenhe.","time":"10-15 min","timeSec":750,"why":"O intervalo entre ver e registrar mostra o que a percepcao considera essencial. O que some em 30 segundos nao tinha peso visual suficiente para ser retido.","how":"Observe a cena ou objeto em silencio por exatamente 30 segundos. Feche os olhos. Desenhe tudo que ainda esta presente. Olhe o original so depois.","variations":["Aumente para 60 segundos - note se o resultado melhora muito ou pouco.","Faca com um rosto: o que voce retem em 30 segundos?","Repita o mesmo objeto tres dias seguidos e compare."]},{"suit":"EMOCAO","kids":true,"prompt":"Desenhe o cheiro\ndo lugar onde\nvoce esta.","time":"10-20 min","timeSec":900,"why":"Traduzir um sentido nao-visual para o desenho forca a invencao de uma linguagem propria - textura, ritmo, densidade - que nao vem de nenhuma referencia visual previa.","how":"Respire fundo e preste atencao ao cheiro do ambiente. Nao represente o objeto que causa o cheiro - desenhe a sensacao em si: intensidade, direcao, camadas.","variations":["Tente com um cheiro de memoria - infancia, lugar especifico, pessoa.","Compare como duas pessoas diferentes desenham o mesmo cheiro.","Faca em serie: o mesmo lugar em epocas diferentes do ano."]},{"suit":"PARADOXO","kids":true,"prompt":"O erro e\no comeco.","time":"Livre","timeSec":0,"why":"Tratar o erro como ponto de partida - e nao como interrupcao - muda completamente a relacao com o processo. O que parecia errado revela possibilidades que o traco certo nunca abriria.","how":"Faca um traco qualquer - sem intencao. Observe: o que esse traco pode virar? Deixe o erro conduzir a proxima decisao. Continue ate o papel estar completo.","variations":["Faca um borrao intencional e construa a partir dele.","De o papel para outra pessoa estragar e depois retome.","Use o lado errado do papel como regra."]},{"suit":"TEMPO","kids":true,"prompt":"Faca o traco mais\nlento que conseguir.","time":"5-10 min","timeSec":420,"why":"A velocidade minima possivel exige presenca total. Cada milimetro do traco passa a ter peso e intencao - e o oposto do gesto automatico.","how":"Escolha um percurso simples: o contorno de uma xicara, uma linha reta de 10cm. Faca esse traco no tempo mais lento possivel sem levantar o lapis. Observe a resistencia interna.","variations":["Faca o mesmo traco em velocidade normal depois - compare a atencao.","Tente com olhos fechados no mesmo ritmo lento.","Use um metronomo: um traco por batida."]},{"suit":"EMOCAO","kids":false,"prompt":"Desenhe um sentimento\nsem usar formas\nreconheciveis.","time":"10-20 min","timeSec":900,"why":"Abstrair completamente obriga a encontrar equivalentes visuais para estados internos - ritmo, pressao, densidade, direcao. E onde o desenho se aproxima da musica.","how":"Escolha um sentimento presente agora. Sem representar nada concreto: como e a intensidade? Tem direcao? E pesado ou leve? Ocupa o centro ou as bordas? Deixe a mao responder.","variations":["Faca a mesma emocao em tres tamanhos diferentes de papel.","Compare como outra pessoa desenha a mesma emocao.","Desenhe a emocao oposta em seguida no mesmo papel."]},{"suit":"TEMPO","kids":false,"prompt":"Termine antes de\nquerer terminar.","time":"Livre","timeSec":0,"why":"Parar antes do ponto de satisfacao treina a tolerancia ao inacabado - e muitas vezes o que resta e mais vivo do que o que seria completado. A contencao e uma habilidade tecnica.","how":"Comece sem definir o tempo. Quando sentir que esta chegando perto de terminar - pare agora. Nao adicione mais nada. Observe o resultado por um minuto inteiro.","variations":["Determine de antemao: farei apenas 5 tracos.","Use um timer: quando tocar, a mao para - mesmo no meio de uma linha.","Faca uma serie: 5 desenhos interrompidos do mesmo sujeito."]},{"suit":"PROCESSO","kids":true,"prompt":"Copie algo que esta\nna sala - mas mude\numa coisa.","time":"10-20 min","timeSec":900,"why":"A regra da mudanca unica forca uma decisao consciente sobre o que e essencial no objeto e o que e acidental. Copiar com alteracao intencional e analise disfarçada de jogo.","how":"Encontre algo na sala para copiar. Antes de comecar, decida: qual propriedade voce vai mudar? Tamanho, proporcao, textura, posicao, gravidade? Mantenha tudo mais fiel possivel - exceto isso.","variations":["Mude duas coisas - veja onde o objeto deixa de ser reconhecivel.","Copie tres vezes, mudando algo diferente em cada uma.","Deixe outra pessoa decidir o que muda."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe com os olhos\nfechados do inicio\nao fim.","time":"5-10 min","timeSec":420,"why":"Sem referencia visual, o desenho vira puro gesto e tato - a relacao entre a mao, o lapis e o papel fica em primeiro plano. O resultado conta a historia do movimento, nao da forma.","how":"Feche os olhos antes de encostar o lapis no papel. Desenhe qualquer coisa - um objeto imaginado, uma cena. Nao abra os olhos ate considerar terminado. So entao olhe.","variations":["Faca com alguem descrevendo verbalmente o que voce deve desenhar.","Tente um autorretrato de olhos fechados.","Repita tres vezes seguidas - observe como a mao aprende o caminho."]},{"suit":"PROCESSO","kids":true,"prompt":"Use so\nlinhas retas.","time":"10-15 min","timeSec":750,"why":"A restricao da linha reta obriga a encontrar solucoes angulares para formas curvas - e revela o quanto da curva e realmente necessaria. E um treino de sintese e geometria intuitiva.","how":"Escolha qualquer objeto ou cena. A regra: o lapis so anda em linha reta. Nenhuma curva. Use quantas linhas precisar, em qualquer direcao e comprimento.","variations":["Limite ainda mais: so horizontais e verticais - sem diagonais.","Use apenas linhas longas: minimo de 5cm cada.","Tente um rosto humano - onde o reto falha e o que isso revela?"]},{"suit":"PROCESSO","kids":true,"prompt":"Use so\nlinhas curvas.","time":"10-15 min","timeSec":750,"why":"Sem angulo, tudo flui. A curva tem natureza organica e ritmica - forcar tudo a ser curvo revela a tensao entre o que e fluido e o que exige decisao.","how":"Nenhuma linha reta, nenhum angulo. Tudo e curva. Tente o mesmo objeto que voce desenhou so com retas e compare.","variations":["Alterne: uma curva longa, uma curva curta, repetindo.","Use apenas espirais - cada forma comeca e termina em espiral.","Faca uma paisagem urbana so com curvas."]},{"suit":"PROCESSO","kids":false,"prompt":"Comeca pelo detalhe\nmais irrelevante.","time":"15-25 min","timeSec":1200,"why":"Comecar pelo detalhe periferico inverte a hierarquia habitual - e frequentemente revela que nao existe detalhe irrelevante. O que parecia marginal passa a organizar o todo.","how":"Olhe para o objeto ou cena e identifique o menor detalhe, o mais insignificante. Comece por ele. Deixe o desenho crescer a partir dessa periferia em direcao ao centro.","variations":["Comece por tres detalhes irrelevantes antes de qualquer forma principal.","Faca o mesmo objeto comecando pelo mais relevante - compare.","Deixe o detalhe periferico ocupar metade do papel."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o espaco\nentre as coisas,\nnao as coisas.","time":"10-20 min","timeSec":900,"why":"Ver o espaco negativo desativa os atalhos simbolicos que substituem a percepcao real pela memoria de como as coisas deveriam parecer. O negativo mostra o que o positivo esconde.","how":"Escolha um objeto com silhueta complexa: cadeira, planta, bicicleta. Em vez de contornar o objeto, preencha os espacos ao redor e entre suas partes. O objeto surgira em branco.","variations":["Use aquarela para preencher os negativos - o peso muda o ritmo.","Fotografe e inverta as cores - objeto e fundo trocam de lugar.","Tente com letras: desenhe os espacos dentro e entre elas."]},{"suit":"PARADOXO","kids":true,"prompt":"Deixe o papel em\nbranco em mais\nda metade.","time":"10-20 min","timeSec":900,"why":"A maioria das pessoas usa o papel como espaco a ser preenchido. Impor o branco como regra obriga a pensar em peso visual, respiracao e onde a presenca de um traco cria mais tensao.","how":"Antes de comecar, decida: mais de 50% ficara vazio. Decida o que vai desenhar e onde esse elemento vai habitar o papel. Respeite o branco como parte do desenho.","variations":["Limite a apenas 10% do papel: um canto, uma faixa estreita.","Use o papel na vertical - observe como muda a economia de espaco.","Coloque o elemento principal no canto mais extremo."]},{"suit":"EMOCAO","kids":false,"prompt":"Desenhe algo que\nso existe na\nsua memoria.","time":"15-25 min","timeSec":1200,"why":"Desenhar de memoria pura mostra o que ficou, o que foi reconstruido e o que foi completamente inventado pelo cerebro. A memoria e criativa mesmo quando nao quer ser.","how":"Escolha um lugar, pessoa ou objeto que voce nao pode consultar agora. Desenhe a partir do que esta disponivel internamente. Nao busque referencia - o que a memoria oferece e o material.","variations":["Compare com uma foto depois - identifique o que voce amplificou, apagou ou inventou.","Repita o mesmo objeto depois de uma semana: o que muda na memoria?","Peca para alguem que conhece o mesmo lugar desenhar - compare."]},{"suit":"PROCESSO","kids":true,"prompt":"Repita o mesmo\ntraco 20 vezes.","time":"10-15 min","timeSec":750,"why":"A repeticao expoe a variacao - cada traco igual e ligeiramente diferente. Com 20 repeticoes, padroes emergem: onde a mao acelera, onde hesita, onde encontra seu ritmo natural.","how":"Escolha um traco simples: uma curva, um angulo, uma letra. Faca exatamente 20 vezes, uma ao lado da outra. Observe como o traco muda do primeiro ao ultimo.","variations":["Repita 20 vezes acelerando progressivamente - do mais lento ao mais rapido.","Faca 20 vezes so com pressao variando - do mais leve ao mais pesado.","Repita o mesmo traco em 20 papeis diferentes."]},{"suit":"CORPO","kids":true,"prompt":"Desenhe com a cabeca\nvirada para\no outro lado.","time":"5-10 min","timeSec":420,"why":"Dissociar cabeca e mao - dois sistemas que normalmente trabalham juntos - cria uma friccao produtiva. A atencao precisa se dividir e isso revela como os dois processos dependem um do outro.","how":"Vire a cabeca para um lado enquanto a mao desenha do outro. Observe a dificuldade: ela e visual, motora ou de atencao? Nao corrija - continue com a cabeca virada.","variations":["Feche um olho e vire a cabeca para o lado oposto ao olho aberto.","Tente escrever seu nome com a cabeca virada.","Faca por 5 minutos seguidos - observe se a dificuldade diminui."]},{"suit":"PARADOXO","kids":false,"prompt":"Que forma teria\no silencio?","time":"Livre","timeSec":0,"why":"Perguntas sem resposta correta abrem o espaco para escolhas inteiramente pessoais - e revelam o vocabulario visual que cada pessoa desenvolveu para o que nao pode ser nomeado diretamente.","how":"Nao responda com palavras - responda com o desenho. Nao existe certo ou errado. Deixe a pergunta ficar sem solucao verbal enquanto a mao trabalha. Observe as decisoes que surgem.","variations":["Depois, pergunte: que forma teria o barulho? Compare os dois.","Faca em grupo e compare as respostas visuais.","Desenhe o silencio de um lugar especifico que voce conhece."]},{"suit":"TEMPO","kids":true,"prompt":"Desenhe devagar o\nque voce normalmente\nfaria rapido.","time":"10-20 min","timeSec":900,"why":"Cada gesto habitual carrega uma velocidade inscrita. Forcar o oposto expoe quanto do resultado depende do tempo - e o quanto o ritmo e uma escolha tecnica, nao uma necessidade.","how":"Identifique algo que voce costuma desenhar rapidamente: um rosto esquematico, uma arvore. Faca o mesmo no tempo minimo possivel. Observe o que aparece que normalmente nao apareceria.","variations":["Faca em tres velocidades: lento, normal, rapido. Compare os tres.","Use um metronomo para impor um ritmo fixo e incomum.","Grave em video - observe como o ritmo muda o gesto."]},{"suit":"OLHAR","kids":true,"prompt":"Feche um olho.\nDesenhe.","time":"10-15 min","timeSec":750,"why":"Com um olho fechado, a visao binocular - responsavel pela percepcao de profundidade - se desativa. O espaco achatado que resulta e mais proximo do que o papel pode representar do que a visao normal.","how":"Feche um olho e mantenha assim durante o desenho. Observe o achatamento do espaco. Compare depois com um esboco feito com os dois olhos.","variations":["Troque o olho que fica aberto na metade do desenho - note a diferenca de angulo.","Tente com objetos em diferentes distancias: perto, medio, longe.","Use o exercicio para estudar perspectiva intuitiva."]},{"suit":"CORPO","kids":true,"prompt":"Use o dedo no\nlugar do lapis.","time":"10-15 min","timeSec":750,"why":"O dedo tem atrito, temperatura e sensacao que o lapis nao tem. Desenhar com ele muda a relacao com o suporte - o papel deixa de ser distante e vira parte do gesto.","how":"Use o dedo direto no papel - com grafite, carvao, aquarela ou a sujeira do proprio dedo. Observe a diferenca de pressao e largura em relacao ao lapis.","variations":["Use diferentes dedos: polegar, indicador, minimo - cada um tem espessura diferente.","Tente com a palma inteira para grandes massas de valor.","Combine dedo e lapis no mesmo desenho."]},{"suit":"PROCESSO","kids":true,"prompt":"Comece de um ponto\nqualquer no centro\nda folha.","time":"10-20 min","timeSec":900,"why":"Comecar pelo centro rompe a leitura linear ocidental do papel e forca a pensar em expansao radial, onde o desenho cresce em todas as direcoes ao mesmo tempo.","how":"Faca um ponto no centro exato do papel. A partir dai, o desenho so pode crescer para fora - em qualquer direcao, mas sempre expandindo. Nao volte ao centro depois de sair.","variations":["Faca 5 pontos espalhados pelo papel e construa a partir de todos simultaneamente.","Comece pelo canto - e va em direcao ao centro. Compare as duas abordagens.","Tente sem levantar o lapis: uma linha espiral do centro para fora."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe o que esta\ndiretamente\nacima de voce.","time":"10-20 min","timeSec":900,"why":"O plano aereo raramente e observado - e desenhar o teto, o ceu ou a copa das arvores forca a reorganizar toda a relacao entre o corpo, o espaco e o papel.","how":"Deite-se ou incline a cabeca para tras. Observe o que esta exatamente acima de voce. Desenhe essa vista - com o papel na horizontal sobre o peito, se quiser manter a relacao espacial.","variations":["Faca deitado na rua, em uma praca, em uma floresta - compare os tres tetos.","Fotografe e desenhe depois: o que a foto preservou que voce nao viu?","Tente na chuva - o ceu como plano dinamico."]},{"suit":"PROCESSO","kids":true,"prompt":"Escolha uma cor\ne use so ela.","time":"15-25 min","timeSec":1200,"why":"A restricao cromatica obriga a encontrar dentro de um unico pigmento toda a variacao necessaria: pressao, diluicao, sobreposicao, ausencia. E onde a limitacao revela o potencial.","how":"Escolha uma cor - qualquer uma. Essa e a unica cor do desenho. Explore toda a variacao possivel: pressao, agua, sobreposicao, area coberta, borda seca versus umida.","variations":["Escolha uma cor que nao combinaria com o assunto - veja o que acontece.","Tente com preto: quantas cores existem dentro do preto?","Use a mesma cor em dois papeis de cores diferentes."]},{"suit":"PARADOXO","kids":false,"prompt":"O que voce nao sabe\ndesenhar -\ndesenhe isso.","time":"Livre","timeSec":0,"why":"O repertorio de evitacao e tao importante quanto o de dominio. O que evitamos desenhar revela os limites que definimos para nos mesmos - cruca-los, mesmo mal, e sempre revelador.","how":"Identifique honestamente algo que voce evita desenhar. Comece - mesmo sem saber como. Nao pesquise referencia antes. Deixe a dificuldade aparecer sem tentar contorna-la.","variations":["Faca uma lista de 5 coisas que voce evita e sorteie.","Repita o mesmo tema 10 dias seguidos - observe a transformacao.","Compare o primeiro com o decimo."]},{"suit":"EMOCAO","kids":false,"prompt":"Desenhe\no peso de algo.","time":"10-20 min","timeSec":900,"why":"Peso e uma qualidade que o desenho costuma ignorar - representamos formas, nao forcas. Traduzir gravidade para o papel exige reinventar a relacao entre linha, mancha e espaco.","how":"Escolha algo que tem peso real ou metaforico: uma pedra, uma palavra, uma noticia. Desenhe nao a forma do objeto - mas a sensacao de segurar esse peso.","variations":["Compare o peso de dois objetos parecidos mas com pesos fisicos diferentes.","Desenhe algo leve depois - use o contraste.","Represente o peso crescendo: uma pedra que vai afundando."]},{"suit":"PROCESSO","kids":false,"prompt":"Faca uma linha\nque nunca\nse repita.","time":"5-15 min","timeSec":600,"why":"Toda linha tem uma textura de decisao - pressao, velocidade, direcao. Impor que ela nunca repita nenhuma qualidade obriga a uma atencao continua a cada milimetro do traco.","how":"Comece a linha. A regra: ela nunca pode repetir nenhuma caracteristica - pressao, velocidade, curvatura, direcao devem variar constantemente. Observe onde a atencao cansa.","variations":["Faca duas linhas que nunca se repetem - e que nunca se cruzam.","Tente por 5 minutos sem parar.","Use a linha como unico elemento de um desenho completo."]},{"suit":"PARADOXO","kids":false,"prompt":"Desenhe a mesma\ncoisa duas vezes -\ndiferente.","time":"15-25 min","timeSec":1200,"why":"A impossibilidade do exercicio e o ponto: o mesmo objeto nunca pode ser desenhado de novo - o tempo, a atencao e a mao ja mudaram. O que muda revela o que estava vivo no primeiro.","how":"Desenhe algo. Observe o resultado. Agora desenhe de novo - com a intencao de fazer diferente, mas sem mudar o sujeito. Compare: o que mudou sem voce ter decidido?","variations":["Faca 5 vezes o mesmo objeto: observe a curva de transformacao.","Faca com 5 anos de intervalo - guarde o primeiro.","Peca para outra pessoa fazer diferente do que voce fez."]},{"suit":"EMOCAO","kids":false,"prompt":"Que forma tem\na saudade?","time":"Livre","timeSec":0,"why":"A saudade e difusa, temporal e corporal ao mesmo tempo. Tentar desenha-la e construir uma linguagem particular para algo que o idioma visual ainda nao nomeou.","how":"Nao escolha o objeto da saudade para desenhar - escolha a saudade em si. Como ela ocupa o espaco? Tem bordas ou e difusa? Esta em movimento ou parada?","variations":["Compare com alguem: a saudade de cada pessoa tem forma diferente?","Desenhe a saudade de um lugar, de uma pessoa e de um tempo - sao formas diferentes?","Repita em datas diferentes."]},{"suit":"CORPO","kids":true,"prompt":"Desenhe em ritmo\nde respiracao.","time":"10-15 min","timeSec":750,"why":"A respiracao e o metronomo mais acessivel e mais esquecido. Sincronizar o traco com o ritmo do corpo cria uma qualidade de atencao diferente - mais lenta, mais presente, mais incorporada.","how":"Inspire e faca um traco. Expire e faca outro. O traco segue o ritmo da respiracao - nao force a respiracao a seguir o traco. Observe como o desenho muda com respiracoes calmas ou agitadas.","variations":["Faca o mesmo desenho depois de uma corrida - compare o resultado.","Use a expiracao para os tracos principais e a inspiracao para os secundarios.","Tente com olhos fechados."]},{"suit":"PARADOXO","kids":false,"prompt":"Comece\npelo fim.","time":"15-25 min","timeSec":1200,"why":"Saber onde o desenho vai terminar antes de comecar inverte toda a logica de construcao. O que normalmente e consequencia torna-se ponto de partida - e o processo de chegada precisa ser reinventado.","how":"Decida onde o desenho vai terminar - qual sera o ultimo traco, o ultimo elemento. Faca esse elemento primeiro. Agora construa tudo o que precisava existir antes dele.","variations":["Defina os dois extremos - primeiro e ultimo traco - e construa o meio.","Tente com um autorretrato: o que seria o fim de um rosto?","Faca em dois sentidos com dois lapis ao mesmo tempo."]},{"suit":"PROCESSO","kids":true,"prompt":"Use o papel de um\njeito que ele nao\nfoi feito para ser\nusado.","time":"Livre","timeSec":0,"why":"O suporte tem suas proprias regras implicitas - e quebra-las expoe o quanto dessas regras voce estava seguindo sem perceber. O papel dobrado, rasgado, molhado ou em pe e outro papel.","how":"Antes de desenhar, faca algo ao papel que nao e esperado: dobre, rasgue, molhe, amasse, corte, cole sobre outro. So entao desenhe - levando em conta o que o papel agora e.","variations":["Desenhe nas duas faces ao mesmo tempo - vire enquanto desenha.","Use o rasgo como elemento: onde o papel termina, o traco continua.","Amasse completamente e abra - desenhe seguindo os vincos."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o movimento\nde algo que\nesta parado.","time":"15-25 min","timeSec":1200,"why":"Todo objeto parado carrega marcas do movimento que o criou ou do movimento que esta por vir. Ver essas forcas congeladas exige uma leitura que vai alem do contorno.","how":"Escolha algo estatico: pedra, cadeira, tecido dobrado. Observe as forcas presentes: tensao, compressao, equilibrio, colapso iminente. Desenhe essas forcas - nao as formas.","variations":["Desenhe a trajetoria que um objeto fez para chegar onde esta.","Imagine o proximo movimento e desenhe-o junto com o presente.","Compare um objeto natural com um manufaturado - as forcas sao diferentes?"]},{"suit":"CORPO","kids":true,"prompt":"Deixe a mao andar\nsem destino\npor um minuto.","time":"1-3 min","timeSec":120,"why":"A mao sem instrucao revela seu repertorio espontaneo - os tracos que ela ja sabe fazer sem que a mente ordene. Esse vocabulario automatico e o ponto de partida para encontrar seu estilo.","how":"Coloque o lapis no papel. Durante um minuto, deixe a mao se mover sem nenhuma intencao - nem abstrato, nem figurativo. Depois observe: o que a mao escolheu?","variations":["Faca com olhos fechados.","Repita toda semana por um mes - compare os resultados.","Use como aquecimento antes de qualquer sessao de desenho."]},{"suit":"OLHAR","kids":false,"prompt":"Desenhe o que esta\nfora do\nenquadramento.","time":"10-20 min","timeSec":900,"why":"O enquadramento e uma decisao - e o que fica de fora e tao real quanto o que foi incluido. Treinar o olho para o fora-de-campo expande a percepcao espacial e questiona a naturalidade de qualquer corte.","how":"Olhe para uma cena atraves de um enquadramento: janela, maos em moldura, camera. Identifique o que esta logo fora do corte. Desenhe apenas o que nao entra no enquadramento.","variations":["Desenhe a continuacao de uma fotografia: o que esta alem das bordas?","Mude o enquadramento - desenhe o que era fora-de-campo como se fosse o centro.","Use um espelho para ver o que esta atras enquanto enquadra a frente."]},{"suit":"EMOCAO","kids":true,"prompt":"Que textura\ntem hoje?","time":"10-15 min","timeSec":750,"why":"O dia tem qualidades sensoriais que raramente sao nomeadas - e muito menos desenhadas. Traduzir a textura do tempo presente para o papel e uma forma de atencao plena com instrumentos de desenho.","how":"Pare por um momento. Como e a textura deste dia - nao o que voce esperava, mas o que esta acontecendo agora? Rugoso, liso, umido, seco, granulado, macio? Desenhe essa textura.","variations":["Faca toda semana - compare as texturas ao longo do tempo.","Desenhe a textura de um dia muito diferente deste.","Descreva em palavras depois de desenhar - compare as duas descricoes."]},{"suit":"PARADOXO","kids":false,"prompt":"Faca uma escolha\nruim de proposito.","time":"10-20 min","timeSec":900,"why":"A escolha ruim no desenho costuma ser qualquer coisa que foge da expectativa tecnica. Faze-la com intencao transforma o erro em ferramenta - frequentemente o ruim era apenas inesperado.","how":"Identifique o que seria a escolha errada neste desenho: cor errada, proporcao errada, tecnica inapropriada. Faca essa escolha deliberadamente. Depois tente justifica-la.","variations":["Faca todas as escolhas ruins em sequencia - o resultado final e o experimento.","Repita a escolha ruim 10 vezes ate ela virar uma tecnica.","Mostre para alguem sem contar - veja se percebem o intencional."]},{"suit":"TEMPO","kids":false,"prompt":"Desenhe mais rapido\ndo que consegue\npensar.","time":"15 seg x 10","timeSec":150,"why":"A velocidade que supera o pensamento elimina a mediacao conceitual - o que aparece no papel nao passou pelo filtro da intencao. E o estado onde o gesto mais revela.","how":"Use um temporizador: 15 ou 30 segundos por desenho. Repita 10 vezes seguidas sem olhar os resultados. So entao veja todos juntos.","variations":["30 retratos em 30 segundos cada.","Uma paisagem inteira em 45 segundos.","Aumente progressivamente: 15, 30, 45, 60 - observe onde a qualidade muda."]},{"suit":"TEMPO","kids":false,"prompt":"Interrompa antes de\nsentir que acabou.","time":"Livre","timeSec":0,"why":"O momento antes do fim e onde o desenho ainda esta vivo - tenso, com possibilidades abertas. Aprender a parar ali e aprender que o inacabado pode ser mais expressivo que o completo.","how":"Comece a desenhar sem definir o fim. Preste atencao interna: quando sentir que esta quase terminando - pare agora. Nao adicione mais nada. Observe.","variations":["Faca uma serie de 5 desenhos interrompidos do mesmo sujeito - compare onde cada um parou.","Peca para outra pessoa dizer quando parar.","Guarde por uma semana e veja se sente vontade de continuar."]},{"suit":"PROCESSO","kids":true,"prompt":"Deixe o papel decidir\na direcao.","time":"Livre","timeSec":0,"why":"O papel tem qualidades fisicas - textura, bordas, vincos, manchas - que podem ser interlocutores do desenho em vez de fundo passivo. Deixar o suporte conduzir e uma pratica de escuta.","how":"Antes de desenhar, observe o papel com atencao: ha marcas, dobras, textura irregular? Deixe essas qualidades sugerir onde comecar e para onde ir. O papel ja esta falando - escute.","variations":["Use papel encontrado: embrulho, papel de pao, jornal, envelope usado.","Tente com papel molhado: ele literalmente decide o que acontece.","Use o verso de um desenho antigo - o passado entra no presente."]},{"suit":"CORPO","kids":false,"prompt":"Desenhe com o ombro,\nnao com o pulso.","time":"10-20 min","timeSec":900,"why":"A maioria dos tracos cotidianos vem do pulso - pequenos, controlados, locais. Usar o ombro como articulacao principal libera tracos maiores, mais conectados ao corpo inteiro e com outra qualidade de energia.","how":"Use papel grande ou superficie vertical. Mova o lapis a partir do ombro - sem dobrar o pulso. O cotovelo pode dobrar, mas a forca e a direcao vem de cima.","variations":["Tente com o braco completamente estendido - pulso e cotovelo travados.","Use superficie vertical (parede, cavalete) - muda completamente a mecanica.","Alterne ombro e pulso no mesmo desenho."]},{"suit":"EMOCAO","kids":false,"prompt":"Que cor tem um barulho\nque incomoda?","time":"10-15 min","timeSec":750,"why":"Sinestesia - a traducao de um sentido para outro - e um exercicio de invencao de linguagem. Nao existe resposta certa: existe a resposta que revela como voce conecta percepcoes.","how":"Pense em um barulho que te incomoda. Nao represente a fonte do barulho - represente a cor da sensacao que ele cria. Escolha pigmentos, aplique, e observe se a cor captura algo real.","variations":["Faca para um barulho agradavel - compare as cores.","Faca em grupo: cada pessoa ouve o mesmo barulho e escolhe uma cor diferente.","Tente com um cheiro, um gosto, uma sensacao tatil."]},{"suit":"OLHAR","kids":true,"prompt":"Desenhe algo que voce\nnunca reparou antes.","time":"10-20 min","timeSec":900,"why":"A atencao tem rotas habituais - e o que nao esta na rota e invisivel. Escolher ativamente o que nunca foi visto e um ato de renovacao da percepcao.","how":"Procure em volta: o que nunca recebeu sua atencao? Um detalhe de infraestrutura, uma sombra regular, uma mancha no teto. Observe por 2 minutos antes de desenhar.","variations":["Faca em um lugar que voce conhece muito bem - o invisivel esta mais escondido onde nos sentimos em casa.","Fotografe antes de desenhar - compare o que a camera viu e o que o olho escolheu.","Faca todo dia por uma semana: um detalhe nunca visto."]},{"suit":"PARADOXO","kids":false,"prompt":"Menos e mais -\nou talvez nao.","time":"Livre","timeSec":0,"why":"A questao nao tem resposta - e essa e a questao. Decidir onde esta o menos e mais e onde ele falha e uma escolha estetica que cada desenho exige. O exercicio e tomar essa decisao conscientemente.","how":"Comece com a intencao de maxima economia: o minimo de tracos possivel. A partir do momento em que voce sentir que menos nao esta servindo - adicione. Observe onde esta essa fronteira.","variations":["Faca o oposto: comece com excesso deliberado e va removendo.","Compare os dois processos e os dois resultados.","Defina de antemao: este desenho tera exatamente 7 tracos."]},{"suit":"TEMPO","kids":false,"prompt":"Desenhe o tempo que\nesta passando agora.","time":"Livre","timeSec":0,"why":"O tempo e invisivel mas deixa rastros - no corpo, na luz, no cansaco, na atencao. Torna-lo visivel exige inventar um sistema de registro que nao existe antes de voce cria-lo.","how":"Nao represente um relogio ou uma ampulheta - represente o tempo como qualidade presente. Que forma tem essa hora do dia? Deixe o desenho durar enquanto voce faz.","variations":["Faca um desenho por hora durante um dia - compare.","Um desenho feito em exatamente 7 minutos, outro em 30.","Desenhe no momento em que o dia muda de qualidade."]},{"suit":"PROCESSO","kids":false,"prompt":"Apague mais do\nque desenhou.","time":"15-25 min","timeSec":1200,"why":"O apagamento e uma ferramenta, nao um erro. Desenhar com a borracha como instrumento principal inverte a logica aditiva e revela formas que surgem por subtracao - como escultura.","how":"Cubra o papel com grafite ou carvao. Use a borracha como se fosse o lapis - ela e o instrumento que cria. O que voce remove e o desenho. Apague mais do que o que resta marcado.","variations":["Use diferentes tipos de borracha: dura, maleavel, de vinil - cada uma tem uma qualidade de traco diferente.","Combine: desenhe, apague, desenhe sobre o apagado.","Faca um autorretrato so com apagamento."]},{"suit":"EMOCAO","kids":false,"prompt":"Desenhe a sensacao\nde esperar.","time":"Livre","timeSec":0,"why":"Esperar tem textura, ritmo e espacialidade proprios - a dilatacao do tempo, a atencao dividida, o corpo em suspensao. Traduzir isso para o papel exige inventar marcas visuais de uma experiencia que se sente, nao se ve.","how":"Pense em uma espera real: fila, consultorio, mensagem sem resposta. Desenhe nao o lugar - mas a qualidade interna da espera. Como o tempo se comporta? Onde fica no corpo?","variations":["Compare a espera ansiosa com a espera calma - sao visualmente diferentes?","Desenhe enquanto espera de verdade - deixe o contexto entrar no papel.","Faca em serie: 5 esperas diferentes da sua vida."]},{"suit":"PROCESSO","kids":true,"prompt":"Inverta o papel.\nContinue.","time":"Livre","timeSec":0,"why":"Virar o papel muda a relacao com o que ja foi feito - o que era certo fica de cabeca para baixo, e novas relacoes emergem. E uma forma de ver o trabalho em progresso com olhos renovados.","how":"Comece um desenho. Em algum momento, vire o papel 180 graus. Continue nessa nova orientacao. Deixe que as marcas ja feitas ganhem novos significados.","variations":["Vire 90 graus em vez de 180.","Vire mais de uma vez - cada virada muda a logica.","Fotografe a cada virada e compare as fases."]},{"suit":"PROCESSO","kids":true,"prompt":"Escreva uma palavra.\nTransforme-a\nem desenho.","time":"10-20 min","timeSec":900,"why":"A fronteira entre escrita e desenho e historica e arbitraria - toda escrita comecou como desenho. Cruzar essa fronteira de volta revela o quanto a letra ja e uma forma visual com geometria, ritmo e personalidade.","how":"Escolha uma palavra qualquer - ou deixe surgir. Escreva-a. Agora transforme cada letra em forma visual: expanda, distorca, deixe crescer ate que a palavra seja um desenho.","variations":["Use uma palavra que descreve o que voce esta sentindo agora.","Faca com o nome de alguem - veja o que emerge.","Comece pelo desenho e transforme-o em escrita: o caminho inverso."]},{"suit":"EMOCAO","kids":true,"prompt":"Desenhe como se\nninguem fosse ver.","time":"Livre","timeSec":0,"why":"A audiencia imaginaria muda tudo: a escolha do sujeito, o nivel de risco, a tolerancia ao erro. Remover essa audiencia - mesmo como exercicio mental - abre espacos que o olhar dos outros fecha.","how":"Antes de comecar, repita para si: ninguem vai ver isso. Pode rasgar depois. Isso nao existe para ninguem alem de voce agora. Depois desenhe - o que quer que venha.","variations":["Efetivamente destrua o desenho depois - rasque, queime, jogue fora.","Faca em um caderno que nunca mostrara para ninguem.","Repita toda semana."]},{"suit":"PARADOXO","kids":false,"prompt":"O que seria um\ntraco honesto?","time":"Livre","timeSec":0,"why":"A honestidade no desenho nao e tecnica - e uma relacao entre a intencao, o gesto e o resultado. Perguntar o que seria um traco honesto e perguntar onde estamos quando estamos desenhando.","how":"Nao responda antes de desenhar. Faca um traco - qualquer um. Depois pergunte: esse traco foi honesto? Faca outro com essa consciencia. Observe o que muda.","variations":["Faca um traco desonesto de proposito - compare.","Repita a pergunta em diferentes materiais: o traco honesto muda com o instrumento?","Pergunte no final de uma sessao longa: qual foi o traco mais honesto?"]},{"suit":"PARADOXO","kids":false,"prompt":"Desenhe tudo o que\nnao cabe na folha.","time":"Livre","timeSec":0,"why":"O impossivel como instrucao libera - porque nao existe certo ou errado quando a tarefa e por definicao irrealizavel. O que aparece no papel quando se tenta o impossivel e sempre mais interessante.","how":"O que nao cabe: o infinito, o que esta atras das paredes, o que esta acontecendo em outro lugar agora, o passado inteiro deste lugar. Escolha um impossivel e tente.","variations":["O que nao cabe em tamanho: desenhe o oceano, o sistema solar, a cidade inteira.","O que nao cabe em tempo: desenhe os proximos cem anos deste lugar.","O que nao cabe em dimensao: desenhe o interior de uma pedra."]}];
 
-const SUIT_COLORS={OLHAR:{l:"#1A3A6B",d:"#7AADEE"},CORPO:{l:"#4A1A7A",d:"#B89AEE"},EMOÇÃO:{l:"#7A1A3A",d:"#EE8AAA"},PARADOXO:{l:"#5A3A0A",d:"#D4A07A"},TEMPO:{l:"#0A3A1A",d:"#7ADDA0"},PROCESSO:{l:"#3A3A0A",d:"#C8C860"}};
-function sc(suit){const dk=window.matchMedia('(prefers-color-scheme:dark)').matches;return(SUIT_COLORS[suit]||{})[dk?'d':'l']||'var(--ink)'}
+// Display text uses original Portuguese — keep suit names for display
+const SUIT_DISPLAY={"OLHAR":"OLHAR","CORPO":"CORPO","EMOCAO":"EMO\u00c7\u00c3O","PARADOXO":"PARADOXO","TEMPO":"TEMPO","PROCESSO":"PROCESSO"};
+const SUIT_FILTER={"OLHAR":"OLHAR","CORPO":"CORPO","EMOCAO":"EMOCAO","PARADOXO":"PARADOXO","TEMPO":"TEMPO","PROCESSO":"PROCESSO"};
 
-// ── STATE ──
+const SC={OLHAR:{l:"#1A3A6B",d:"#7AADEE"},CORPO:{l:"#4A1A7A",d:"#B89AEE"},EMOCAO:{l:"#7A1A3A",d:"#EE8AAA"},PARADOXO:{l:"#5A3A0A",d:"#D4A07A"},TEMPO:{l:"#0A3A1A",d:"#7ADDA0"},PROCESSO:{l:"#3A3A0A",d:"#C8C860"}};
+const sc=s=>(SC[s]||{})[window.matchMedia('(prefers-color-scheme:dark)').matches?'d':'l']||'var(--ink)';
+const $=id=>document.getElementById(id);
+const p2br=s=>s.replace(/\n/g,'<br>');
+
+// PWA manifest
+const mf={name:"Baralho Criativo",short_name:"Baralho",description:"54 exercicios de desenho e percepcao",start_url:"./",display:"standalone",orientation:"portrait",background_color:"#F6F3EE",theme_color:"#F6F3EE",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%2318180F'/%3E%3Ctext x='256' y='340' font-size='300' text-anchor='middle' fill='%23F6F3EE' font-family='serif'%3Ebc%3C/text%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+document.getElementById('manifestLink').href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/json'}));
+
+// Service Worker
+if('serviceWorker' in navigator){
+  const sw=`const C='bc-v2',A=['./','https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>Promise.allSettled(A.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>clients.claim()))});
+self.addEventListener('fetch',e=>{const u=e.request.url;if(u.includes('fonts.')){e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{caches.open(C).then(c=>c.put(e.request,res.clone()));return res})))}else{e.respondWith(fetch(e.request).then(res=>{caches.open(C).then(c=>c.put(e.request,res.clone()));return res}).catch(()=>caches.match(e.request)))}});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})),{scope:'./'}).catch(()=>{});
+}
+
+// State
 let lastCard=null,sessionCount=0,sessionHistory=[],isFlipped=false,currentCard=null;
 let favs=JSON.parse(localStorage.getItem('bc_favs')||'[]');
-let listSuit='TODOS',listKids=false;
-let presentSide='front'; // 'front' | 'back'
+let listSuit='TODOS',listKids=false,presentSide='front';
 let timerInterval=null,timerRemaining=0,timerTotal=0,timerPaused=false;
-let touchStartX=0;
+let touchStartX=0,isAnimating=false;
 
-// ── DOM ──
-const $=id=>document.getElementById(id);
-const emptyState=$('emptyState'),cardWrap=$('cardWrap'),cardInner=$('cardInner');
-const cardFront=$('cardFront'),cardBack=$('cardBack');
-const drawBtn=$('drawBtn'),counterTxt=$('counterTxt');
-const historyWrap=$('historyWrap'),historyRow=$('historyRow');
-const favPanel=$('favPanel'),favChips=$('favChips'),favClearBtn=$('favClearBtn'),favToggleBtn=$('favToggleBtn');
-const listOverlay=$('listOverlay'),listClose=$('listClose'),listScroll=$('listScroll'),listCount=$('listCount');
-const presentOverlay=$('presentOverlay'),presentClose=$('presentClose');
-const presentFront=$('presentFront'),presentBack=$('presentBack'),presentFlipBtn=$('presentFlipBtn');
-const timerOverlay=$('timerOverlay'),timerDisplay=$('timerDisplay'),timerProgress=$('timerProgress');
-const timerPauseBtn=$('timerPauseBtn'),timerCloseBtn=$('timerCloseBtn');
-const toast=$('toast');
-
-// ── CARTA DO DIA ──
+// Carta do dia
 (()=>{
-  const d=new Date();
-  const idx=((d.getFullYear()*366+d.getMonth()*31+d.getDate())%CARDS.length+CARDS.length)%CARDS.length;
-  const cod=CARDS[idx];
-  const codArea=$('codArea');
-  codArea.innerHTML=`<div class="cod-label">Carta do dia</div>
-    <div class="cod-suit" style="color:${sc(cod.suit)}">${cod.suit}</div>
-    <div class="cod-prompt" id="codBtn">${cod.prompt.replace(/\n/g,'<br>')}</div>`;
-  $('codBtn').addEventListener('click',()=>{sessionCount++;lastCard=cod;showCard(cod);drawBtn.textContent='Sortear outra'});
+  const d=new Date(),idx=((d.getFullYear()*366+d.getMonth()*31+d.getDate())%CARDS.length+CARDS.length)%CARDS.length,cod=CARDS[idx];
+  $('codArea').innerHTML=`<div class="cod-label">Carta do dia</div><div class="cod-suit" style="color:${sc(cod.suit)}">${SUIT_DISPLAY[cod.suit]||cod.suit}</div><div class="cod-prompt" id="codBtn">${p2br(cod.prompt)}</div>`;
+  $('codBtn').addEventListener('click',()=>{sessionCount++;lastCard=cod;showCard(cod);$('drawBtn').textContent='Sortear outra'});
 })();
 
-// ── LIST OVERLAY ──
-$('listBtn').addEventListener('click',()=>{
-  renderList();
-  listOverlay.classList.add('active');
-});
-listClose.addEventListener('click',()=>listOverlay.classList.remove('active'));
-
-document.querySelectorAll('.list-filter-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const suit=btn.dataset.suit;
-    if(suit==='KIDS'){
-      listKids=!listKids;
-      btn.classList.toggle('kids-active',listKids);
-    } else {
-      document.querySelectorAll('.list-filter-btn:not([data-suit="KIDS"])').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      listSuit=suit;
-    }
-    renderList();
-  });
-});
-
-function getListPool(){
-  let pool=CARDS;
-  if(listSuit!=='TODOS') pool=pool.filter(c=>c.suit===listSuit);
-  if(listKids) pool=pool.filter(c=>c.kids);
-  return pool;
-}
-
-function renderList(){
-  const pool=getListPool();
-  listCount.textContent=`${pool.length} carta${pool.length!==1?'s':''}`;
-  listScroll.innerHTML=pool.map((card,i)=>{
-    const idx=CARDS.indexOf(card);
-    const fav=isFav(card);
-    return `<div class="list-item" data-idx="${idx}">
-      <span class="list-item-suit" style="color:${sc(card.suit)}">${card.suit}</span>
-      <span class="list-item-prompt">${card.prompt.replace(/\n/g,'<br>')}</span>
-      ${card.kids?'<span class="list-item-kids">★</span>':''}
-      <span class="list-item-fav${fav?' active':''}" data-fav="${idx}">♡</span>
-    </div>`;
-  }).join('');
-
-  listScroll.querySelectorAll('.list-item').forEach(item=>{
-    // fav click
-    item.querySelector('.list-item-fav').addEventListener('click',e=>{
-      e.stopPropagation();
-      const idx=+e.target.dataset.fav;
-      toggleFav(CARDS[idx]);
-      renderList();
-    });
-    // open card
-    item.addEventListener('click',()=>{
-      const idx=+item.dataset.idx;
-      sessionCount++;lastCard=CARDS[idx];
-      showCard(CARDS[idx]);
-      drawBtn.textContent='Sortear outra';
-      listOverlay.classList.remove('active');
-    });
-  });
-}
-
-// ── PRESENT OVERLAY ──
-$('presentBtn').addEventListener('click',()=>{
-  if(!currentCard){showToast('Sorteie uma carta primeiro');return}
-  openPresent(currentCard,'front');
-});
-
-function openPresent(card,side){
-  const color=sc(card.suit);
-  // frente
-  $('presentSuit').textContent=card.suit;
-  $('presentSuit').style.color=color;
-  $('presentPrompt').textContent=card.prompt;
-  $('presentKids').textContent=card.kids?'★ para crianças':'';
-  // verso
-  const varsHtml=card.variations.map(v=>`<div class="present-var">${v}</div>`).join('');
-  presentBack.innerHTML=`
-    <div>
-      <div class="present-section-label" style="color:${color}">${card.suit} · ${card.time}</div>
-    </div>
-    <div>
-      <div class="present-section-label">Por que fazer</div>
-      <div class="present-why">${card.why}</div>
-    </div>
-    <div>
-      <div class="present-section-label">Como fazer</div>
-      <div class="present-how">${card.how}</div>
-    </div>
-    <div>
-      <div class="present-section-label">Variações</div>
-      <div class="present-vars">${varsHtml}</div>
-    </div>`;
-
-  setSide(side);
-  presentOverlay.classList.add('active');
-}
-
-function setSide(side){
-  presentSide=side;
-  if(side==='front'){
-    presentFront.classList.remove('hidden');
-    presentBack.classList.remove('visible');
-    presentFlipBtn.textContent='Ver exercício →';
-  } else {
-    presentFront.classList.add('hidden');
-    presentBack.classList.add('visible');
-    presentFlipBtn.textContent='← Ver prompt';
-  }
-}
-
-presentFlipBtn.addEventListener('click',()=>setSide(presentSide==='front'?'back':'front'));
-presentClose.addEventListener('click',()=>presentOverlay.classList.remove('active'));
-
-// ── FAVORITAS ──
-favToggleBtn.addEventListener('click',()=>{
-  favPanel.classList.toggle('open');
-  favToggleBtn.classList.toggle('active-mode',favPanel.classList.contains('open'));
-  if(favPanel.classList.contains('open')) renderFavs();
-});
-favClearBtn.addEventListener('click',()=>{favs=[];saveFavs();renderFavs()});
-
-function isFav(card){return favs.some(f=>f.prompt===card.prompt&&f.suit===card.suit)}
-
-function toggleFav(card){
-  if(isFav(card)){
-    favs=favs.filter(f=>!(f.prompt===card.prompt&&f.suit===card.suit));
-    showToast('Removida dos favoritos');
-  } else {
-    favs.push({suit:card.suit,prompt:card.prompt,idx:CARDS.indexOf(card)});
-    showToast('Adicionada aos favoritos ♡');
-  }
-  saveFavs();renderFavs();
-  const fb=document.getElementById('favCardBtn');
-  if(fb) fb.classList.toggle('active',isFav(card));
-  updateFavBtn();
-}
-function saveFavs(){localStorage.setItem('bc_favs',JSON.stringify(favs))}
-function updateFavBtn(){favToggleBtn.textContent=favs.length?`♡ ${favs.length}`:'♡'}
-updateFavBtn();
-
-function renderFavs(){
-  if(!favs.length){favChips.innerHTML='<span class="fav-empty">Nenhuma carta salva ainda.</span>';return}
-  favChips.innerHTML=favs.map((f,i)=>`<div class="fav-chip" data-idx="${i}">
-    <span class="fav-chip-suit" style="color:${sc(f.suit)}">${f.suit}</span>
-    <span class="fav-chip-text">${f.prompt.replace(/\n/g,' ')}</span>
-    <span class="fav-chip-remove">×</span>
-  </div>`).join('');
-  favChips.querySelectorAll('.fav-chip').forEach(chip=>{
-    chip.addEventListener('click',e=>{
-      if(e.target.classList.contains('fav-chip-remove')){
-        const i=+chip.dataset.idx;favs.splice(i,1);saveFavs();renderFavs();updateFavBtn();
-      } else {
-        const i=+chip.dataset.idx,ci=favs[i].idx;
-        if(ci>=0&&ci<CARDS.length) showCard(CARDS[ci]);
-      }
-    });
-  });
-}
-
-// ── TIMER ──
-function startTimer(card){
-  if(!card.timeSec)return;
-  $('timerSuit').textContent=card.suit;$('timerSuit').style.color=sc(card.suit);
-  $('timerPrompt').textContent=card.prompt;
-  timerTotal=card.timeSec;timerRemaining=card.timeSec;
-  timerPaused=false;timerPauseBtn.textContent='Pausar';
-  timerProgress.style.width='100%';
-  timerOverlay.classList.add('active');
-  updateTimerDisplay();clearInterval(timerInterval);
-  timerInterval=setInterval(tickTimer,1000);
-}
-function tickTimer(){
-  if(timerPaused)return;
-  timerRemaining--;
-  if(timerRemaining<=0){
-    timerRemaining=0;clearInterval(timerInterval);updateTimerDisplay();
-    timerDisplay.classList.add('urgent');
-    if(navigator.vibrate)navigator.vibrate([200,100,200]);
-    timerPauseBtn.textContent='Reiniciar';
-    timerPauseBtn.onclick=()=>{if(currentCard)startTimer(currentCard)};
-  } else {
-    updateTimerDisplay();
-    timerDisplay.classList.toggle('urgent',timerRemaining<=10);
-    timerProgress.style.width=(timerRemaining/timerTotal*100)+'%';
-  }
-}
-function updateTimerDisplay(){
-  const m=Math.floor(timerRemaining/60).toString().padStart(2,'0');
-  const s=(timerRemaining%60).toString().padStart(2,'0');
-  timerDisplay.textContent=`${m}:${s}`;
-}
-timerPauseBtn.addEventListener('click',()=>{
-  if(timerRemaining<=0)return;
-  timerPaused=!timerPaused;timerPauseBtn.textContent=timerPaused?'Continuar':'Pausar';
-});
-timerCloseBtn.addEventListener('click',()=>{
-  clearInterval(timerInterval);timerOverlay.classList.remove('active');
-  timerDisplay.classList.remove('urgent');timerPauseBtn.onclick=null;
-});
-
-// ── HISTORY ──
-function addToHistory(card){
-  sessionHistory.unshift(card);
-  if(sessionHistory.length>8)sessionHistory=sessionHistory.slice(0,8);
-  renderHistory();
-}
-function renderHistory(){
-  if(!sessionHistory.length){historyWrap.style.display='none';return}
-  historyWrap.style.display='flex';
-  historyRow.innerHTML=sessionHistory.map((c,i)=>`<div class="history-chip" data-idx="${i}">
-    <div class="history-chip-suit" style="color:${sc(c.suit)}">${c.suit}</div>
-    <span class="history-chip-text">${c.prompt.replace(/\n/g,' ')}</span>
-  </div>`).join('');
-  historyRow.querySelectorAll('.history-chip').forEach(chip=>{
-    chip.addEventListener('click',()=>showCard(sessionHistory[+chip.dataset.idx],false));
-  });
-}
-
-// ── RENDER CARD ──
+// Render card
 function renderCard(card){
-  const color=sc(card.suit);
-  const num=String(CARDS.indexOf(card)+1).padStart(2,'0');
-  const favActive=isFav(card);
-  const hasTimer=card.timeSec>0;
-  cardFront.innerHTML=`<div class="face-front">
-    <div class="front-meta">
-      <span class="front-suit" style="color:${color}">${card.suit}</span>
-      <span class="front-num">${num} / 54</span>
-    </div>
-    <div class="front-body">
-      <div class="front-prompt">${card.prompt.replace(/\n/g,'<br>')}</div>
-      ${card.kids?'<div class="front-kids"><span class="kids-dot"></span>para crianças</div>':''}
-    </div>
-    <div class="front-hint">
-      <span class="hint-txt">toque para ver o exercício</span>
-      <button class="fav-btn${favActive?' active':''}" id="favCardBtn">♡</button>
-    </div>
-  </div>`;
+  const color=sc(card.suit),num=String(CARDS.indexOf(card)+1).padStart(2,'0'),favActive=isFav(card),hasTimer=card.timeSec>0,suitLabel=SUIT_DISPLAY[card.suit]||card.suit;
+  $('cardFront').innerHTML=`<div class="face-front"><div class="front-meta"><span class="front-suit" style="color:${color}">${suitLabel}</span><span class="front-num">${num} / 54</span></div><div class="front-body"><div class="front-prompt">${p2br(card.prompt)}</div>${card.kids?'<div class="front-kids"><span class="kids-dot"></span>para criancas</div>':''}</div><div class="front-hint"><span class="hint-txt">toque para ver o exercicio</span><button class="fav-btn${favActive?' active':''}" id="favCardBtn">&#9825;</button></div></div>`;
   $('favCardBtn').addEventListener('click',e=>{e.stopPropagation();toggleFav(card)});
-
-  const varsHtml=card.variations.map(v=>`<div class="back-var">${v}</div>`).join('');
-  cardBack.innerHTML=`<div class="face-back">
-    <div class="back-meta">
-      <span class="back-label" style="color:${color}">${card.suit}</span>
-      <div class="back-time-wrap">
-        <span class="back-time">${card.time}</span>
-        ${hasTimer?`<button class="timer-start-btn" id="timerStartBtn">iniciar</button>`:''}
-      </div>
-    </div>
-    <div class="back-body">
-      <div><div class="back-section-label">Por que fazer</div><div class="back-why">${card.why}</div></div>
-      <div><div class="back-section-label">Como fazer</div><div class="back-how">${card.how}</div></div>
-      <div><div class="back-section-label">Variações</div><div class="back-vars">${varsHtml}</div></div>
-    </div>
-    <div class="back-bottom"><span class="hint-arrow">toque para voltar ↻</span></div>
-  </div>`;
+  const vh=card.variations.map(v=>`<div class="back-var">${v}</div>`).join('');
+  $('cardBack').innerHTML=`<div class="face-back"><div class="back-meta"><span class="back-label" style="color:${color}">${suitLabel}</span><div class="back-time-wrap"><span class="back-time">${card.time}</span>${hasTimer?`<button class="timer-start-btn" id="timerStartBtn">iniciar</button>`:''}</div></div><div class="back-body"><div><div class="back-section-label">Por que fazer</div><div class="back-why">${card.why}</div></div><div><div class="back-section-label">Como fazer</div><div class="back-how">${card.how}</div></div><div><div class="back-section-label">Variacoes</div><div class="back-vars">${vh}</div></div></div><div class="back-bottom"><span class="hint-arrow">toque para voltar &#8635;</span></div></div>`;
   if(hasTimer) $('timerStartBtn').addEventListener('click',e=>{e.stopPropagation();startTimer(card)});
 }
 
-// ── SHOW CARD ──
-function showCard(card,addHist=true){
-  currentCard=card;isFlipped=false;
-  cardInner.classList.remove('flipped');
+// Slide animation - resets flip first, hides back during slide
+function slideIn(card){
+  const ANIM_MS=400;
+  isFlipped=false;
+  $('cardInner').classList.remove('flipped');
   renderCard(card);
-  emptyState.style.display='none';
-  cardWrap.style.display='block';
-  cardWrap.classList.remove('card-entering');void cardWrap.offsetWidth;
-  cardWrap.classList.add('card-entering');
-  setTimeout(()=>cardWrap.classList.remove('card-entering'),500);
-  if(addHist)addToHistory(card);
-  counterTxt.textContent=`${sessionCount} sorteada${sessionCount!==1?'s':''}`;
+  $('cardInner').classList.remove('slide-in');
+  void $('cardInner').offsetWidth; // reflow
+  $('cardInner').classList.add('slide-in');
+  setTimeout(()=>{
+    $('cardInner').classList.remove('slide-in');
+    isAnimating=false;
+  }, ANIM_MS);
 }
 
-// ── SORTEAR ──
-drawBtn.addEventListener('click',()=>{
+function showCard(card,addHist=true){
+  currentCard=card;
+  const vp=$('cardViewport');
+  $('emptyState').style.display='none';
+  vp.style.display='block';
+  if(!isAnimating){
+    isAnimating=true;
+    slideIn(card);
+  }
+  if(addHist)addToHistory(card);
+  $('counterTxt').textContent=`${sessionCount} sorteada${sessionCount!==1?'s':''}`;
+}
+
+$('drawBtn').addEventListener('click',()=>{
   sessionCount++;
-  const pool=CARDS;
-  const available=pool.filter(c=>c!==lastCard);
-  const card=(available.length?available:pool)[Math.floor(Math.random()*(available.length||pool.length))];
-  lastCard=card;
-  if(cardWrap.style.display!=='none'){
-    cardInner.classList.add('shuffle-anim');
-    setTimeout(()=>{cardInner.classList.remove('shuffle-anim');showCard(card)},440);
-  } else showCard(card);
-  drawBtn.textContent='Sortear outra';
+  const avail=CARDS.filter(c=>c!==lastCard);
+  const card=(avail.length?avail:CARDS)[Math.floor(Math.random()*(avail.length||CARDS.length))];
+  lastCard=card;showCard(card);$('drawBtn').textContent='Sortear outra';
 });
 
-// ── FLIP ──
-cardInner.addEventListener('click',()=>{isFlipped=!isFlipped;cardInner.classList.toggle('flipped',isFlipped)});
+$('cardInner').addEventListener('click',()=>{
+  isFlipped=!isFlipped;$('cardInner').classList.toggle('flipped',isFlipped);
+});
 
-// ── SWIPE ──
-cardWrap.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX},{passive:true});
-cardWrap.addEventListener('touchend',e=>{
+$('cardViewport').addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX},{passive:true});
+$('cardViewport').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-touchStartX;
   if(Math.abs(dx)>55){
     sessionCount++;
-    const pool=CARDS,available=pool.filter(c=>c!==lastCard);
-    const card=(available.length?available:pool)[Math.floor(Math.random()*(available.length||pool.length))];
-    lastCard=card;
-    cardInner.classList.add('shuffle-anim');
-    setTimeout(()=>{cardInner.classList.remove('shuffle-anim');showCard(card)},440);
-    drawBtn.textContent='Sortear outra';
+    const avail=CARDS.filter(c=>c!==lastCard);
+    const card=(avail.length?avail:CARDS)[Math.floor(Math.random()*(avail.length||CARDS.length))];
+    lastCard=card;showCard(card);$('drawBtn').textContent='Sortear outra';
   }
 },{passive:true});
 
-// ── TOAST ──
-function showToast(msg){
-  toast.textContent=msg;toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),2000);
+// List
+$('listBtn').addEventListener('click',()=>{renderList();$('listOverlay').classList.add('active')});
+$('listClose').addEventListener('click',()=>$('listOverlay').classList.remove('active'));
+document.querySelectorAll('.list-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const s=btn.dataset.suit;
+    if(s==='KIDS'){listKids=!listKids;btn.classList.toggle('kids-active',listKids)}
+    else{document.querySelectorAll('.list-filter-btn:not([data-suit="KIDS"])').forEach(b=>b.classList.remove('active'));btn.classList.add('active');listSuit=s}
+    renderList();
+  });
+});
+function getListPool(){
+  let p=CARDS;
+  if(listSuit!=='TODOS')p=p.filter(c=>c.suit===listSuit);
+  if(listKids)p=p.filter(c=>c.kids);
+  return p;
 }
+function renderList(){
+  const pool=getListPool();
+  $('listCount').textContent=`${pool.length} carta${pool.length!==1?'s':''}`;
+  $('listScroll').innerHTML=pool.map(card=>{
+    const idx=CARDS.indexOf(card),sL=SUIT_DISPLAY[card.suit]||card.suit;
+    return `<div class="list-item" data-idx="${idx}"><span class="list-item-suit" style="color:${sc(card.suit)}">${sL}</span><span class="list-item-prompt">${p2br(card.prompt)}</span>${card.kids?'<span class="list-item-kids">&#9733;</span>':''}<span class="list-item-fav${isFav(card)?' active':''}" data-fav="${idx}">&#9825;</span></div>`;
+  }).join('');
+  $('listScroll').querySelectorAll('.list-item').forEach(item=>{
+    item.querySelector('.list-item-fav').addEventListener('click',e=>{e.stopPropagation();toggleFav(CARDS[+e.target.dataset.fav]);renderList()});
+    item.addEventListener('click',()=>{const c=CARDS[+item.dataset.idx];sessionCount++;lastCard=c;showCard(c);$('drawBtn').textContent='Sortear outra';$('listOverlay').classList.remove('active')});
+  });
+}
+
+// Presentation
+$('presentBtn').addEventListener('click',()=>{if(!currentCard){showToast('Sorteie uma carta primeiro');return}openPresent(currentCard,'front')});
+function openPresent(card,side){
+  const color=sc(card.suit),sL=SUIT_DISPLAY[card.suit]||card.suit;
+  $('presentSuitEl').textContent=sL;$('presentSuitEl').style.color=color;
+  $('presentPromptEl').textContent=card.prompt;
+  $('presentKidsEl').textContent=card.kids?'★ para criancas':'';
+  const vh=card.variations.map(v=>`<div class="present-var">${v}</div>`).join('');
+  $('presentBack').innerHTML=`<div><div class="present-section-label" style="color:${color}">${sL} &middot; ${card.time}</div></div><div><div class="present-section-label">Por que fazer</div><div class="present-why">${card.why}</div></div><div><div class="present-section-label">Como fazer</div><div class="present-how">${card.how}</div></div><div><div class="present-section-label">Variacoes</div><div class="present-vars">${vh}</div></div>`;
+  setSide(side);$('presentOverlay').classList.add('active');
+}
+function setSide(side){
+  presentSide=side;
+  const f=$('presentFront'),b=$('presentBack'),btn=$('presentFlipBtn');
+  if(side==='front'){f.classList.remove('hidden');b.classList.remove('visible');btn.textContent='Ver exercicio \u2192'}
+  else{f.classList.add('hidden');b.classList.add('visible');btn.textContent='\u2190 Ver prompt'}
+}
+$('presentFlipBtn').addEventListener('click',()=>setSide(presentSide==='front'?'back':'front'));
+$('presentClose').addEventListener('click',()=>$('presentOverlay').classList.remove('active'));
+
+// Favorites
+$('favToggleBtn').addEventListener('click',()=>{$('favPanel').classList.toggle('open');$('favToggleBtn').classList.toggle('active-mode',$('favPanel').classList.contains('open'));if($('favPanel').classList.contains('open'))renderFavs()});
+$('favClearBtn').addEventListener('click',()=>{favs=[];saveFavs();renderFavs()});
+function isFav(c){return favs.some(f=>f.prompt===c.prompt&&f.suit===c.suit)}
+function toggleFav(card){
+  if(isFav(card)){favs=favs.filter(f=>!(f.prompt===card.prompt&&f.suit===card.suit));showToast('Removida dos favoritos')}
+  else{favs.push({suit:card.suit,prompt:card.prompt,idx:CARDS.indexOf(card)});showToast('Adicionada \u2665')}
+  saveFavs();renderFavs();
+  const fb=document.getElementById('favCardBtn');if(fb)fb.classList.toggle('active',isFav(card));
+  $('favToggleBtn').textContent=favs.length?`\u2665 ${favs.length}`:'\u2665';
+}
+function saveFavs(){localStorage.setItem('bc_favs',JSON.stringify(favs))}
+function renderFavs(){
+  if(!favs.length){$('favChips').innerHTML='<span class="fav-empty">Nenhuma carta salva ainda.</span>';return}
+  $('favChips').innerHTML=favs.map((f,i)=>{const sL=SUIT_DISPLAY[f.suit]||f.suit;return`<div class="fav-chip" data-idx="${i}"><span class="fav-chip-suit" style="color:${sc(f.suit)}">${sL}</span><span class="fav-chip-text">${f.prompt.replace(/\n/g,' ')}</span><span class="fav-chip-remove">\u00d7</span></div>`}).join('');
+  $('favChips').querySelectorAll('.fav-chip').forEach(chip=>{
+    chip.addEventListener('click',e=>{
+      if(e.target.classList.contains('fav-chip-remove')){const i=+chip.dataset.idx;favs.splice(i,1);saveFavs();renderFavs();$('favToggleBtn').textContent=favs.length?`\u2665 ${favs.length}`:'\u2665'}
+      else{const ci=favs[+chip.dataset.idx].idx;if(ci>=0)showCard(CARDS[ci])}
+    });
+  });
+}
+$('favToggleBtn').textContent=favs.length?`\u2665 ${favs.length}`:'\u2665';
+
+// Timer
+function startTimer(card){
+  if(!card.timeSec)return;
+  $('timerSuit').textContent=SUIT_DISPLAY[card.suit]||card.suit;$('timerSuit').style.color=sc(card.suit);
+  $('timerPrompt').textContent=card.prompt;timerTotal=card.timeSec;timerRemaining=card.timeSec;
+  timerPaused=false;$('timerPauseBtn').textContent='Pausar';$('timerProgress').style.width='100%';
+  $('timerOverlay').classList.add('active');updateTimerDisplay();clearInterval(timerInterval);
+  timerInterval=setInterval(tickTimer,1000);
+}
+function tickTimer(){
+  if(timerPaused)return;timerRemaining--;
+  if(timerRemaining<=0){
+    timerRemaining=0;clearInterval(timerInterval);updateTimerDisplay();$('timerDisplay').classList.add('urgent');
+    if(navigator.vibrate)navigator.vibrate([200,100,200]);$('timerPauseBtn').textContent='Reiniciar';
+    $('timerPauseBtn').onclick=()=>{if(currentCard)startTimer(currentCard)};
+  }else{updateTimerDisplay();$('timerDisplay').classList.toggle('urgent',timerRemaining<=10);$('timerProgress').style.width=(timerRemaining/timerTotal*100)+'%'}
+}
+function updateTimerDisplay(){$('timerDisplay').textContent=`${Math.floor(timerRemaining/60).toString().padStart(2,'0')}:${(timerRemaining%60).toString().padStart(2,'0')}`}
+$('timerPauseBtn').addEventListener('click',()=>{if(timerRemaining<=0)return;timerPaused=!timerPaused;$('timerPauseBtn').textContent=timerPaused?'Continuar':'Pausar'});
+$('timerCloseBtn').addEventListener('click',()=>{clearInterval(timerInterval);$('timerOverlay').classList.remove('active');$('timerDisplay').classList.remove('urgent');$('timerPauseBtn').onclick=null});
+
+// History
+function addToHistory(card){sessionHistory.unshift(card);if(sessionHistory.length>8)sessionHistory=sessionHistory.slice(0,8);renderHistory()}
+function renderHistory(){
+  if(!sessionHistory.length){$('historyWrap').style.display='none';return}
+  $('historyWrap').style.display='flex';
+  $('historyRow').innerHTML=sessionHistory.map((c,i)=>`<div class="history-chip" data-idx="${i}"><div class="history-chip-suit" style="color:${sc(c.suit)}">${SUIT_DISPLAY[c.suit]||c.suit}</div><span class="history-chip-text">${c.prompt.replace(/\n/g,' ')}</span></div>`).join('');
+  $('historyRow').querySelectorAll('.history-chip').forEach(chip=>{chip.addEventListener('click',()=>showCard(sessionHistory[+chip.dataset.idx],false))});
+}
+
+// Toast
+const toast=$('toast');
+function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000)}
 </script>
 </body>
 </html>
